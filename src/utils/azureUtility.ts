@@ -3,29 +3,47 @@ import { IAppSetting } from '../interfaces';
 import { stripIndent } from 'common-tags';
 import { Output } from 'promisify-child-process';
 
+type AzureCommandOption = {
+  subscriptionId?: string;
+  slot?: string;
+};
+
+export function buildAzCommandOptions(options: AzureCommandOption) {
+  const azSubscriptionCommand = options.subscriptionId ? `--subscription ${options.subscriptionId}` : '';
+  const azSlotCommand = options.slot !== 'production' && options.slot !== undefined ? `--slot ${options.slot}` : '';
+  return { azSubscriptionCommand, azSlotCommand };
+}
+
 export const azureCommands = {
-  webAppListAppSettings: (name: string, resourceGroup: string, slot?: string) => {
-    const azSlotCommand = slot !== 'production' && slot !== undefined ? `--slot ${slot}` : '';
+  webAppListAppSettings: (name: string, resourceGroup: string, options: AzureCommandOption) => {
+    const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
     return stripIndent`
       az webapp config appsettings list \\
           --name ${name} \\
           ${azSlotCommand} \\
+          ${azSubscriptionCommand} \\
           --resource-group ${resourceGroup}
   `;
   },
 
-  webAppListConnectionStrings: (name: string, resourceGroup: string, slot?: string) => {
-    const azSlotCommand = slot !== 'production' && slot !== undefined ? `--slot ${slot}` : '';
+  webAppListConnectionStrings: (name: string, resourceGroup: string, options: AzureCommandOption) => {
+    const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
     return stripIndent`
       az webapp config connection-string list \\
           --name ${name} \\
           ${azSlotCommand} \\
+          ${azSubscriptionCommand} \\
           --resource-group ${resourceGroup}
   `;
   },
 
-  webAppSetConnectionString: (name: string, resourceGroup: string, appSetting: IAppSetting, slot?: string) => {
-    const azSlotCommand = slot !== 'production' && slot !== undefined ? `--slot ${slot}` : '';
+  webAppSetConnectionString: (
+    name: string,
+    resourceGroup: string,
+    appSetting: IAppSetting,
+    options: AzureCommandOption
+  ) => {
+    const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
     /**
      * Note: Due to Azure CLI version 2.35.0,
      * If using `--settings` in the code, no matter slotSettings in Azure is True or False,
@@ -37,34 +55,50 @@ export const azureCommands = {
      */
     const slotSettingCommand = appSetting.slotSetting === true ? '--slot-settings' : '--settings';
     const key = appSetting.name.replaceAll('"', '\\"');
+    if (appSetting.value === null) throw new Error('Something wrong with implementation, value should not be null');
     const value = appSetting.value.replaceAll('"', '\\"');
     return stripIndent`
       az webapp config connection-string set \\
           --name ${name} \\
           ${azSlotCommand} \\
+          ${azSubscriptionCommand} \\
           --connection-string-type ${appSetting.type} \\
           --resource-group ${resourceGroup} \\
           ${slotSettingCommand} "${key}"="${value}"
   `;
   },
 
-  webAppSetAppSettingsByFile: (name: string, resourceGroup: string, slot: string, appSettingPath: string) => {
-    const azSlotCommand = slot !== 'production' && slot !== undefined ? `--slot ${slot}` : '';
+  webAppSetAppSettingsByFile: (
+    name: string,
+    resourceGroup: string,
+    appSettingPath: string,
+    options: AzureCommandOption
+  ) => {
+    const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
     return stripIndent`
       az webapp config appsettings set \\
         --name ${name} \\
         --resource-group ${resourceGroup} \\
         ${azSlotCommand} \\
+        ${azSubscriptionCommand} \\
         --settings @${appSettingPath}
     `;
   },
 
-  webAppDeploySlotSwap: (name: string, resourceGroup: string, slot: string, targetSlot: string) => {
+  webAppDeploySlotSwap: (
+    name: string,
+    resourceGroup: string,
+    slot: string,
+    targetSlot: string,
+    options: Omit<AzureCommandOption, 'slot'>
+  ) => {
+    const { azSubscriptionCommand } = buildAzCommandOptions(options);
     return stripIndent`
       az webapp deployment slot swap \\
         --name ${name} \\
         --resource-group ${resourceGroup} \\
         --slot ${slot} \\
+        ${azSubscriptionCommand} \\
         --target-slot ${targetSlot}
     `;
   },
@@ -73,17 +107,17 @@ export const azureCommands = {
 export async function webAppListConnectionStrings(
   name: string,
   resourceGroup: string,
-  slot?: string
+  options: AzureCommandOption
 ): Promise<IAppSetting[]> {
-  const result = await executeProcess(azureCommands.webAppListConnectionStrings(name, resourceGroup, slot));
+  const result = await executeProcess(azureCommands.webAppListConnectionStrings(name, resourceGroup, options));
   return JSON.parse(parseBufferToString(result.stdout));
 }
 
 export async function webAppSetConnectionStrings(
   name: string,
   resourceGroup: string,
-  slot: string,
-  appSettings: IAppSetting[]
+  appSettings: IAppSetting[],
+  options: AzureCommandOption
 ) {
   /**
    * Because Azure CLI cannot use set JSON file with connection string
@@ -92,7 +126,7 @@ export async function webAppSetConnectionStrings(
    */
   const workers: Promise<Output>[] = [];
   for (const appSetting of appSettings) {
-    workers.push(executeProcess(azureCommands.webAppSetConnectionString(name, resourceGroup, appSetting, slot)));
+    workers.push(executeProcess(azureCommands.webAppSetConnectionString(name, resourceGroup, appSetting, options)));
   }
   await Promise.all(workers);
 }
@@ -100,26 +134,27 @@ export async function webAppSetConnectionStrings(
 export async function webAppListAppSettings(
   name: string,
   resourceGroup: string,
-  slot?: string
+  options: AzureCommandOption
 ): Promise<IAppSetting[]> {
-  const result = await executeProcess(azureCommands.webAppListAppSettings(name, resourceGroup, slot));
+  const result = await executeProcess(azureCommands.webAppListAppSettings(name, resourceGroup, options));
   return JSON.parse(parseBufferToString(result.stdout));
 }
 
 export async function webAppSetAppSettings(
   name: string,
   resourceGroup: string,
-  slot: string,
-  appSettingPath: string
+  appSettingPath: string,
+  options: AzureCommandOption
 ): Promise<Output> {
-  return await executeProcess(azureCommands.webAppSetAppSettingsByFile(name, resourceGroup, slot, appSettingPath));
+  return await executeProcess(azureCommands.webAppSetAppSettingsByFile(name, resourceGroup, appSettingPath, options));
 }
 
 export async function webAppSwap(
   name: string,
   resourceGroup: string,
   slot: string,
-  targetSlot: string
+  targetSlot: string,
+  options: Omit<AzureCommandOption, 'slot'>
 ): Promise<Output> {
-  return await executeProcess(azureCommands.webAppDeploySlotSwap(name, resourceGroup, slot, targetSlot));
+  return await executeProcess(azureCommands.webAppDeploySlotSwap(name, resourceGroup, slot, targetSlot, options));
 }

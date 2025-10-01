@@ -14,18 +14,18 @@ export default class ConnectionStrings extends AppSettingsBase {
   /** @override */
   public async list() {
     core.info('Listing App Setting from Azure Web App (Azure App Service) ...');
-    const { name, resourceGroup, slot, targetSlot } = this.swapAppService;
+    const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
     [this.source, this.target] = await Promise.all([
-      webAppListConnectionStrings(name, resourceGroup, slot),
-      webAppListConnectionStrings(name, resourceGroup, targetSlot),
+      webAppListConnectionStrings(name, resourceGroup, { subscriptionId, slot }),
+      webAppListConnectionStrings(name, resourceGroup, { subscriptionId, slot: targetSlot }),
     ]);
     return this;
   }
 
   /** @override */
   public async setWebApp(appSettings: IAppSetting[], slot: string) {
-    const { name, resourceGroup } = this.swapAppService;
+    const { name, resourceGroup, subscriptionId } = this.swapAppService;
     core.info('Start set ConnectionString');
-    await webAppSetConnectionStrings(name, resourceGroup, slot, appSettings);
+    await webAppSetConnectionStrings(name, resourceGroup, appSettings, { subscriptionId, slot });
   }
 }

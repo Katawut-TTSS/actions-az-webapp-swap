@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import * as artifact from '@actions/artifact';
+import { DefaultArtifactClient, Artifact, DownloadArtifactResponse } from '@actions/artifact';
 import fs from 'fs';
 import path from 'path';
 import { createBranchWhenNotExist, createPullRequest, gitCommit, gitCommitNewBranch } from '../utils/githubUtiltiy';
@@ -15,14 +15,18 @@ interface ICreateSwapPlanOption {
   path: string;
 }
 
+interface ArtifactItem extends DownloadArtifactResponse, Artifact {
+  downloadPath: string;
+}
+
 export class CreateSwapPlan {
   constructor(private options: ICreateSwapPlanOption) {}
 
   public async execute() {
     core.debug(`Using create-swap-plan mode`);
     const { repo, path: targetPath, ref, token: personalAccessToken } = this.options;
-    const artifactClient = artifact.create();
-    const downloadResponse = await artifactClient.downloadAllArtifacts();
+    const artifactClient = new DefaultArtifactClient();
+    const listArtifactsResponse = await artifactClient.listArtifacts();
 
     const sharedGitConfig = {
       repo,
@@ -38,18 +42,30 @@ export class CreateSwapPlan {
      * Step 2: Commit Marked App Setting (Source Slot)
      */
     const pathUtility = new PathUtility(WorkingDirectory.root);
+    fs.mkdirSync(WorkingDirectory.root, { recursive: true });
 
     await executeProcess('tree', { slient: false });
 
+    const artifactItems: ArtifactItem[] = [];
+
     // output result
-    for (let response of downloadResponse) {
-      console.log(response.artifactName);
-      console.log(response.downloadPath);
-      await executeProcess(
-        `cp -rf ${path.join(response.downloadPath, WorkingDirectory.root, WorkingDirectory.beforeSwap)} ${
-          WorkingDirectory.root
-        }`
+    for (const artifact of listArtifactsResponse.artifacts) {
+      const downloadArtifactResponse = await artifactClient.downloadArtifact(artifact.id, {
+        path: artifact.name,
+      });
+      if (!downloadArtifactResponse.downloadPath) {
+        core.warning(`Artifact ${artifact.name} did not have a download path.`);
+        continue;
+      }
+      artifactItems.push({ ...downloadArtifactResponse, ...artifact } as ArtifactItem);
+      console.log(artifact.name);
+      console.log(downloadArtifactResponse.downloadPath);
+      const beforePath = path.join(
+        downloadArtifactResponse.downloadPath,
+        WorkingDirectory.root,
+        WorkingDirectory.beforeSwap
       );
+      await executeProcess(`cp -rf ${beforePath}/* ${WorkingDirectory.root}/`);
     }
 
     await gitCommit({
@@ -59,19 +75,16 @@ export class CreateSwapPlan {
       message: 'Get App Setting',
     });
     pathUtility.clean();
+    fs.mkdirSync(WorkingDirectory.root, { recursive: true });
 
     /**
      * Step 3: Simulate if values are swapped (Target Slot)
      */
-
-    for (let response of downloadResponse) {
-      console.log(response.artifactName);
-      console.log(response.downloadPath);
-      await executeProcess(
-        `cp -rf ${path.join(response.downloadPath, WorkingDirectory.root, WorkingDirectory.afterSwap)} ${
-          WorkingDirectory.root
-        }`
-      );
+    for (const artifact of artifactItems) {
+      console.log(artifact.name);
+      console.log(artifact.downloadPath);
+      const afterPath = path.join(artifact.downloadPath, WorkingDirectory.root, WorkingDirectory.afterSwap);
+      await executeProcess(`cp -rf ${afterPath}/* ${WorkingDirectory.root}/`);
     }
 
     // Create tmp file if no change it will be merge

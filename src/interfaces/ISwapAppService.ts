@@ -18,10 +18,12 @@ export enum DefaultSlotSettingEnum {
 export interface ISwapAppService {
   name: string;
   resourceGroup: string;
+  subscriptionId?: string;
   slot: string;
   targetSlot: string;
   defaultSlotSetting: DefaultSlotSettingEnum;
   defaultSensitive: DefaultSensitiveEnum;
+  defaultHideValue?: boolean;
   appSettings: ISwapAppSetting[];
   connectionStrings: ISwapAppSetting[];
 }

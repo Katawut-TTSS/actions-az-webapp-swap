@@ -115,6 +115,7 @@ test('test SwapAppSettings slotSettings if one app setting is missing (defaultSl
         slotSetting: false,
         baseSlotSetting: true,
         slots: ['production'],
+        hideValue: false,
       },
     ],
   });
@@ -166,6 +167,7 @@ test('test SwapAppSettings slotSettings if one app setting is missing (defaultSl
         slotSetting: true,
         baseSlotSetting: false,
         slots: ['production'],
+        hideValue: false,
       },
     ],
   });
@@ -217,6 +219,7 @@ test('test SwapAppSettings slotSettings if one app setting is missing (defaultSl
         slotSetting: true,
         baseSlotSetting: true,
         slots: ['production'],
+        hideValue: false,
       },
     ],
   });
@@ -269,6 +272,7 @@ test('test SwapAppSettings sensitive if one app setting is missing (defaultSensi
         slotSetting: false,
         baseSlotSetting: true,
         slots: ['production'],
+        hideValue: false,
       },
     ],
   });
@@ -378,6 +382,7 @@ test('test SwapAppSettings which fullfill can be stacked', () => {
         slotSetting: false,
         baseSlotSetting: true,
         slots: ['production'],
+        hideValue: false,
       },
     ],
   });
@@ -399,6 +404,7 @@ test('test SwapAppSettings which fullfill can be stacked', () => {
         slotSetting: true,
         baseSlotSetting: true,
         slots: ['production', 'staging'],
+        hideValue: false,
       },
     ],
   });
@@ -453,6 +459,7 @@ test('test SwapAppSettings which fullfill can be merged', () => {
         slotSetting: false,
         baseSlotSetting: true,
         slots: ['production'],
+        hideValue: false,
       },
     ],
   });
@@ -488,6 +495,7 @@ test('test SwapAppSettings which fullfill can be merged', () => {
         slotSetting: true,
         baseSlotSetting: true,
         slots: ['production', 'staging'],
+        hideValue: false,
       },
     ],
   });

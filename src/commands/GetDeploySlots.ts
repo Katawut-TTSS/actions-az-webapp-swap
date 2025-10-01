@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import * as artifact from '@actions/artifact';
+import { DefaultArtifactClient, UploadArtifactOptions } from '@actions/artifact';
 import fs from 'fs';
 import path from 'path';
 import { ISwapAppService, IAppSetting } from '../interfaces';
@@ -9,8 +9,7 @@ import { constants } from '../constants';
 import { AppSettingsProviderFactory } from '../core/AppSettingsProviderFactory';
 import { AppSettingsType } from '../core/AppSettingsBase';
 import { getArtifactName } from '../utils/commonUtility';
-import { executeProcess } from '../utils/executeProcess';
-const { WorkingDirectory, DefaultEncoding, gitConfig } = constants;
+const { WorkingDirectory, DefaultEncoding } = constants;
 
 interface IAppSettingSlots {
   source: IAppSetting[];
@@ -26,15 +25,14 @@ export class GetDeploySlots {
   constructor(private swapAppService: ISwapAppService) {}
 
   private async uploadArtifact(artifactName: string, files: string[]) {
-    const artifactClient = artifact.create();
+    const artifactClient = new DefaultArtifactClient();
     const rootDirectory = '.';
-    const options: artifact.UploadOptions = {
-      continueOnError: false,
+    const options: UploadArtifactOptions = {
       retentionDays: 1,
     };
 
-    const uploadResponse = await artifactClient.uploadArtifact(artifactName, files, rootDirectory, options);
-    core.info(`Upload artifact named, "${uploadResponse.artifactName}" completed!`);
+    await artifactClient.uploadArtifact(artifactName, files, rootDirectory, options);
+    core.info(`Upload artifact named, "${artifactName}" completed!`);
   }
 
   private async getAppSettingsAllSlots(

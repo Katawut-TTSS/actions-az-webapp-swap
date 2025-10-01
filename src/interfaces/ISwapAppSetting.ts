@@ -23,4 +23,8 @@ export interface ISwapAppSetting {
    * value - app setting value
    */
   value?: string;
+  /**
+   * hideValue -- Use in input
+   */
+  hideValue?: boolean;
 }

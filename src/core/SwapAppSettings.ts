@@ -47,6 +47,8 @@ export default class SwapAppSettings {
     // Prepare Sensitive
     const sensitive =
       this.swapAppService.defaultSensitive === DefaultSensitiveEnum.false ? false : FallbackValue.sensitive;
+    // Prepare Hide value
+    const hideValue = this.swapAppService.defaultHideValue === true;
     // Prepare slotSetting
     let slotSetting =
       this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.inherit
@@ -58,6 +60,7 @@ export default class SwapAppSettings {
       name: appSetting.name,
       sensitive,
       slotSetting,
+      hideValue,
       // It will use for merging between 2 app settings
       baseSlotSetting: appSetting.slotSetting,
     };

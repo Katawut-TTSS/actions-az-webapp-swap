@@ -5,6 +5,7 @@ import SwapAppSettings from './SwapAppSettings';
 import fs from 'fs';
 import SwapAppSettingsValidation from '../validation/SwapAppSettings';
 import AppSettingsMasking from './AppSettingsMasking';
+import AppSettingsHiding from './AppSettingsHiding';
 
 export enum AppSettingsType {
   AppSettings = 'AppSettings',
@@ -62,6 +63,14 @@ export default class AppSettingsBase {
     return this;
   }
 
+  public hide() {
+    // Set appSettings null to hide value
+    const appSettingHiding = new AppSettingsHiding(this.swapAppService, this.type);
+    this.source = appSettingHiding.hide(this.source, this.swapAppService.slot);
+    this.target = appSettingHiding.hide(this.target, this.swapAppService.targetSlot);
+    return this;
+  }
+
   public fullfill() {
     core.info('Fullfilling Swap config with App Setting');
     const swapAppSettings = new SwapAppSettings(this.swapAppService);
@@ -84,7 +93,7 @@ export default class AppSettingsBase {
    */
 
   public async loadAppSettings() {
-    (await this.list()).validate().fullfill().mask();
+    (await this.list()).validate().fullfill().mask().hide();
   }
 
   public setWebAppSourceSlot() {

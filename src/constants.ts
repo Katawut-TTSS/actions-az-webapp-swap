@@ -1,5 +1,4 @@
 import { WriteFileOptions } from 'fs';
-import path from 'path';
 
 interface IConstants {
   FallbackValue: {

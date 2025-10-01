@@ -7,7 +7,7 @@ export class SwapSlots {
 
   public async execute() {
     core.debug(`Using swap-slots mode`);
-    const { name, resourceGroup, slot, targetSlot } = this.swapAppService;
-    await webAppSwap(name, resourceGroup, slot, targetSlot);
+    const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
+    await webAppSwap(name, resourceGroup, slot, targetSlot, { subscriptionId });
   }
 }

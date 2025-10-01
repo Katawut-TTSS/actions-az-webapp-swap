@@ -7,6 +7,7 @@ const AppSettingSchema = z.object({
   sensitive: z.boolean(),
   // TODO: Make it optional later
   slotSetting: z.boolean(),
+  hideValue: z.boolean().optional(),
 });
 
 const SwapAppServiceSchema = z.object({
@@ -16,6 +17,7 @@ const SwapAppServiceSchema = z.object({
   targetSlot: z.string(),
   defaultSlotSetting: z.nativeEnum(DefaultSlotSettingEnum),
   defaultSensitive: z.nativeEnum(DefaultSensitiveEnum),
+  defaultHideValue: z.boolean().optional(),
   appSettings: z.array(AppSettingSchema).optional(),
   connectionStrings: z.array(AppSettingSchema).optional(),
 });

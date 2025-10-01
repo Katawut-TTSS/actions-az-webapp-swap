@@ -22,6 +22,6 @@ type connectionStringType =
 export interface IAppSetting {
   name: string;
   slotSetting: boolean;
-  value: string;
+  value: string | null;
   type?: connectionStringType;
 }
