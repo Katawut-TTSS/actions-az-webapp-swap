@@ -338,30 +338,92 @@ Maximum clarity and safety.
 
 ## Development Commands
 
-> Command to run during development and testing.
-> Adjust as needed for your environment.
-> TODO: Add Your specific commands here.
+```bash
+# Install dependencies
+npm install
+
+# Build TypeScript
+npm run build
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Check formatting
+npm run format-check
+
+# Fix formatting
+npm run format
+
+# Bundle for distribution (produces dist/index.js)
+npm run package
+
+# Full CI pipeline: build + format + package + test
+npm run all
+
+# Local development run
+npm start
+```
 
 ## Architecture Overview
 
-> A brief overview of the architecture, key patterns, and important rules.
-> TODO: Fill in with your project's architecture details.
+This is a **GitHub Actions action** for safely swapping Azure App Service deployment slots. It runs on Node.js 16 inside GitHub Actions runners.
+
+The action operates in five modes controlled by the `mode` input: `get-deploy-slots`, `create-swap-plan`, `set-deploy-slots`, `swap-slots`, and `clean`. Each mode dispatches to a dedicated command class.
 
 ### Tech Stack
 
-> List of major technologies used in the project.
+- **TypeScript 4.x** (strict mode, ES6 target, CommonJS modules)
+- **Node.js 16** (GitHub Actions runtime)
+- **@actions/core** -- GitHub Actions I/O
+- **@actions/artifact** -- Artifact upload/download
+- **@azure/arm-appservice** -- Azure App Service management SDK
+- **@azure/identity** -- Azure authentication
+- **zod** -- Runtime schema validation
+- **Jest** (with ts-jest) -- Testing
+- **Prettier** -- Code formatting
+- **@vercel/ncc** -- Bundling to single file for distribution
+- **@swc/core** -- Fast TypeScript compilation for ts-node
 
 ### Key Architectural Patterns
 
-> Description of important architectural patterns (e.g., Repository Pattern, Service Layer, etc.)
-> TODO: Fill in with your project's architectural patterns.
+- **Command Pattern** -- Each operation mode is a class in `src/commands/` with an `execute()` method
+- **Interface-driven design** -- Core data models defined in `src/interfaces/`
+- **Domain separation** -- Core business logic in `src/core/`, utilities in `src/utils/`, validation in `src/validation/`
+- **Single-file distribution** -- Bundled via ncc into `dist/index.js` (checked into git)
 
 ### Directory Structure
 
-> The main directory structure of the project
-> TODO: Fill in with your project's directory structure.
+```
+.
+├── src/
+│   ├── main.ts              # Entry point, mode dispatcher
+│   ├── constants.ts          # Shared constants
+│   ├── commands/             # Command classes (one per mode)
+│   ├── core/                 # Domain logic (SwapAppSettings, AppSettings)
+│   ├── interfaces/           # TypeScript interfaces and types
+│   ├── utils/                # Azure, GitHub, path, and process utilities
+│   └── validation/           # Input and settings validation
+├── __tests__/                # Jest test files
+├── dist/                     # Bundled output (committed to git)
+├── lib/                      # TypeScript build output (gitignored)
+├── .chief/                   # Chief Agent Framework
+│   ├── _rules/               # Global rules (standard, contract, goal, verification)
+│   ├── _template/            # Templates for tasks and milestones
+│   └── milestone-*/          # Milestone workspaces
+├── action.yml                # GitHub Actions action definition
+├── package.json
+└── tsconfig.json
+```
 
 ### Important Development Rules
 
-> Key rules that developers must follow.
-> TODO: Fill in with your project's important development rules.
+- Always run `npm run package` after changing source code -- `dist/` must stay in sync
+- The `dist/` directory is checked into git (required by GitHub Actions)
+- Do not weaken TypeScript strict mode settings
+- Do not add new npm dependencies without explicit approval
+- Never commit `.env`, `secret.json`, or files containing credentials
+- Use `@actions/core.setSecret()` to mask sensitive values in action logs
+- Do not introduce breaking changes to `action.yml` inputs without a major version bump
