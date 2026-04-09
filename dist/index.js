@@ -1281,7 +1281,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.webAppSwap = exports.webAppSetAppSettings = exports.webAppListAppSettings = exports.webAppSetConnectionStrings = exports.webAppListConnectionStrings = exports.azureCommands = exports.buildAzCommandOptions = void 0;
+exports.functionAppSwap = exports.functionAppSetAppSettings = exports.functionAppListAppSettings = exports.functionAppSetConnectionStrings = exports.functionAppListConnectionStrings = exports.webAppSwap = exports.webAppSetAppSettings = exports.webAppListAppSettings = exports.webAppSetConnectionStrings = exports.webAppListConnectionStrings = exports.azureCommands = exports.buildAzCommandOptions = void 0;
 const executeProcess_1 = __nccwpck_require__(58596);
 const common_tags_1 = __nccwpck_require__(69673);
 function buildAzCommandOptions(options) {
@@ -1359,6 +1359,65 @@ exports.azureCommands = {
         --target-slot ${targetSlot}
     `;
     },
+    functionAppListAppSettings: (name, resourceGroup, options) => {
+        const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
+        return (0, common_tags_1.stripIndent) `
+      az functionapp config appsettings list \\
+          --name ${name} \\
+          ${azSlotCommand} \\
+          ${azSubscriptionCommand} \\
+          --resource-group ${resourceGroup}
+  `;
+    },
+    functionAppListConnectionStrings: (name, resourceGroup, options) => {
+        const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
+        return (0, common_tags_1.stripIndent) `
+      az functionapp config connection-string list \\
+          --name ${name} \\
+          ${azSlotCommand} \\
+          ${azSubscriptionCommand} \\
+          --resource-group ${resourceGroup}
+  `;
+    },
+    functionAppSetConnectionString: (name, resourceGroup, appSetting, options) => {
+        const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
+        const slotSettingCommand = appSetting.slotSetting === true ? '--slot-settings' : '--settings';
+        const key = appSetting.name.replaceAll('"', '\\"');
+        if (appSetting.value === null)
+            throw new Error('Something wrong with implementation, value should not be null');
+        const value = appSetting.value.replaceAll('"', '\\"');
+        return (0, common_tags_1.stripIndent) `
+      az functionapp config connection-string set \\
+          --name ${name} \\
+          ${azSlotCommand} \\
+          ${azSubscriptionCommand} \\
+          --connection-string-type ${appSetting.type} \\
+          --resource-group ${resourceGroup} \\
+          ${slotSettingCommand} "${key}"="${value}"
+  `;
+    },
+    functionAppSetAppSettingsByFile: (name, resourceGroup, appSettingPath, options) => {
+        const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
+        return (0, common_tags_1.stripIndent) `
+      az functionapp config appsettings set \\
+        --name ${name} \\
+        --resource-group ${resourceGroup} \\
+        ${azSlotCommand} \\
+        ${azSubscriptionCommand} \\
+        --settings @${appSettingPath}
+    `;
+    },
+    functionAppDeploySlotSwap: (name, resourceGroup, slot, targetSlot, options) => {
+        const { azSubscriptionCommand } = buildAzCommandOptions(options);
+        return (0, common_tags_1.stripIndent) `
+      az functionapp deployment slot swap \\
+        --name ${name} \\
+        --resource-group ${resourceGroup} \\
+        --slot ${slot} \\
+        ${azSubscriptionCommand} \\
+        --target-slot ${targetSlot}
+    `;
+    },
 };
 function webAppListConnectionStrings(name, resourceGroup, options) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -1401,6 +1460,42 @@ function webAppSwap(name, resourceGroup, slot, targetSlot, options) {
     });
 }
 exports.webAppSwap = webAppSwap;
+function functionAppListConnectionStrings(name, resourceGroup, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = yield (0, executeProcess_1.executeProcess)(exports.azureCommands.functionAppListConnectionStrings(name, resourceGroup, options));
+        return JSON.parse((0, executeProcess_1.parseBufferToString)(result.stdout));
+    });
+}
+exports.functionAppListConnectionStrings = functionAppListConnectionStrings;
+function functionAppSetConnectionStrings(name, resourceGroup, appSettings, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const workers = [];
+        for (const appSetting of appSettings) {
+            workers.push((0, executeProcess_1.executeProcess)(exports.azureCommands.functionAppSetConnectionString(name, resourceGroup, appSetting, options)));
+        }
+        yield Promise.all(workers);
+    });
+}
+exports.functionAppSetConnectionStrings = functionAppSetConnectionStrings;
+function functionAppListAppSettings(name, resourceGroup, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = yield (0, executeProcess_1.executeProcess)(exports.azureCommands.functionAppListAppSettings(name, resourceGroup, options));
+        return JSON.parse((0, executeProcess_1.parseBufferToString)(result.stdout));
+    });
+}
+exports.functionAppListAppSettings = functionAppListAppSettings;
+function functionAppSetAppSettings(name, resourceGroup, appSettingPath, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield (0, executeProcess_1.executeProcess)(exports.azureCommands.functionAppSetAppSettingsByFile(name, resourceGroup, appSettingPath, options));
+    });
+}
+exports.functionAppSetAppSettings = functionAppSetAppSettings;
+function functionAppSwap(name, resourceGroup, slot, targetSlot, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield (0, executeProcess_1.executeProcess)(exports.azureCommands.functionAppDeploySlotSwap(name, resourceGroup, slot, targetSlot, options));
+    });
+}
+exports.functionAppSwap = functionAppSwap;
 
 
 /***/ }),
@@ -1691,6 +1786,7 @@ const SwapAppServiceSchema = zod_1.z.object({
     defaultSlotSetting: zod_1.z.nativeEnum(interfaces_1.DefaultSlotSettingEnum),
     defaultSensitive: zod_1.z.nativeEnum(interfaces_1.DefaultSensitiveEnum),
     defaultHideValue: zod_1.z.boolean().optional(),
+    resourceType: zod_1.z.enum(['webapp', 'functionapp']).optional(),
     appSettings: zod_1.z.array(AppSettingSchema).optional(),
     connectionStrings: zod_1.z.array(AppSettingSchema).optional(),
 });
