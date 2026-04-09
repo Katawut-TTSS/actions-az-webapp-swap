@@ -3,7 +3,7 @@ import { IAppSetting } from '../interfaces';
 import { stripIndent } from 'common-tags';
 import { Output } from 'promisify-child-process';
 
-type AzureCommandOption = {
+export type AzureCommandOption = {
   subscriptionId?: string;
   slot?: string;
 };

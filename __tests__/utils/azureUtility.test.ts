@@ -80,7 +80,7 @@ describe('azureUtility', () => {
   });
 
   describe('azureCommands.functionAppSetConnectionString', () => {
-    const appSetting = { name: 'MY_CONN', value: 'Server=tcp:...', type: 'SQLServer', slotSetting: false };
+    const appSetting = { name: 'MY_CONN', value: 'Server=tcp:...', type: 'SQLServer' as const, slotSetting: false };
 
     it('should produce az functionapp config connection-string set command', () => {
       const cmd = azureCommands.functionAppSetConnectionString('my-func', 'my-rg', appSetting, {});
