@@ -572,6 +572,7 @@ const SwapAppSettings_1 = __importDefault(__nccwpck_require__(17137));
 const SwapAppSettings_2 = __importDefault(__nccwpck_require__(26765));
 const AppSettingsMasking_1 = __importDefault(__nccwpck_require__(45438));
 const AppSettingsHiding_1 = __importDefault(__nccwpck_require__(27503));
+const FunctionAppWarnings_1 = __nccwpck_require__(63504);
 var AppSettingsType;
 (function (AppSettingsType) {
     AppSettingsType["AppSettings"] = "AppSettings";
@@ -612,6 +613,7 @@ class AppSettingsBase {
     validate() {
         new SwapAppSettings_2.default(this.swapAppService, this.source).validate(this.swapAppService.slot);
         new SwapAppSettings_2.default(this.swapAppService, this.source).validate(this.swapAppService.targetSlot);
+        (0, FunctionAppWarnings_1.warnFunctionAppCriticalSettings)(this.swapAppService);
         return this;
     }
     mask() {
@@ -1849,6 +1851,64 @@ function findAppSettingName(name, appSettings) {
     return -1;
 }
 exports.findAppSettingName = findAppSettingName;
+
+
+/***/ }),
+
+/***/ 63504:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.warnFunctionAppCriticalSettings = exports.FUNCTION_APP_CRITICAL_SETTINGS = void 0;
+const core = __importStar(__nccwpck_require__(37484));
+exports.FUNCTION_APP_CRITICAL_SETTINGS = [
+    'AzureWebJobsStorage',
+    'FUNCTIONS_WORKER_RUNTIME',
+    'FUNCTIONS_EXTENSION_VERSION',
+    'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+    'WEBSITE_CONTENTSHARE',
+];
+/**
+ * Emits core.warning() for each critical Function App setting that is not marked as slotSetting: true.
+ * Only runs when resourceType === 'functionapp'. Non-blocking.
+ */
+function warnFunctionAppCriticalSettings(swapAppService) {
+    if (swapAppService.resourceType !== 'functionapp') {
+        return;
+    }
+    const appSettingsByName = new Map();
+    for (const setting of swapAppService.appSettings) {
+        appSettingsByName.set(setting.name, { slotSetting: setting.slotSetting === true });
+    }
+    for (const criticalSetting of exports.FUNCTION_APP_CRITICAL_SETTINGS) {
+        const found = appSettingsByName.get(criticalSetting);
+        if (found && !found.slotSetting) {
+            core.warning(`Function App critical setting '${criticalSetting}' is not marked as slotSetting. Swapping this setting may cause issues.`);
+        }
+    }
+}
+exports.warnFunctionAppCriticalSettings = warnFunctionAppCriticalSettings;
 
 
 /***/ }),

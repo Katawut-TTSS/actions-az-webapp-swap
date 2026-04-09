@@ -8,7 +8,7 @@ inputs:
     default: 'default value if applicable'
   config:
     required: false
-    description: 'input description here'
+    description: 'JSON configuration for the swap action. Supports an optional resourceType field accepting "webapp" (default) or "functionapp" to control which Azure CLI commands are used and enable Function App-specific warnings.'
     default: 'default value if applicable'
   token:
     required: false
