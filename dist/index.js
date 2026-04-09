@@ -396,7 +396,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SwapSlots = void 0;
 const core = __importStar(__nccwpck_require__(37484));
-const azureUtility_1 = __nccwpck_require__(86885);
+const AzureResourceStrategy_1 = __nccwpck_require__(64668);
 class SwapSlots {
     constructor(swapAppService) {
         this.swapAppService = swapAppService;
@@ -405,7 +405,8 @@ class SwapSlots {
         return __awaiter(this, void 0, void 0, function* () {
             core.debug(`Using swap-slots mode`);
             const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
-            yield (0, azureUtility_1.webAppSwap)(name, resourceGroup, slot, targetSlot, { subscriptionId });
+            const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
+            yield strategy.swap(name, resourceGroup, slot, targetSlot, { subscriptionId });
         });
     }
 }
@@ -486,8 +487,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(37484));
 const path_1 = __importDefault(__nccwpck_require__(16928));
 const fs_1 = __importDefault(__nccwpck_require__(79896));
-const azureUtility_1 = __nccwpck_require__(86885);
 const AppSettingsBase_1 = __importStar(__nccwpck_require__(75309));
+const AzureResourceStrategy_1 = __nccwpck_require__(64668);
 class AppSettings extends AppSettingsBase_1.default {
     constructor(swapAppService, options) {
         super(swapAppService, AppSettingsBase_1.AppSettingsType.AppSettings, options);
@@ -497,9 +498,10 @@ class AppSettings extends AppSettingsBase_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             core.info('Listing App Setting from Azure Web App (Azure App Service) ...');
             const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
+            const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
             [this.source, this.target] = yield Promise.all([
-                (0, azureUtility_1.webAppListAppSettings)(name, resourceGroup, { subscriptionId, slot }),
-                (0, azureUtility_1.webAppListAppSettings)(name, resourceGroup, { subscriptionId, slot: targetSlot }),
+                strategy.listAppSettings(name, resourceGroup, { subscriptionId, slot }),
+                strategy.listAppSettings(name, resourceGroup, { subscriptionId, slot: targetSlot }),
             ]);
             return this;
         });
@@ -514,7 +516,8 @@ class AppSettings extends AppSettingsBase_1.default {
                 fs_1.default.mkdirSync(workingDirectory, { recursive: true });
             fs_1.default.writeFileSync(appSettingPath, JSON.stringify(appSettings), defaultEncoding);
             core.info('Start set app Setting');
-            yield (0, azureUtility_1.webAppSetAppSettings)(name, resourceGroup, appSettingPath, { subscriptionId, slot });
+            const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
+            yield strategy.setAppSettings(name, resourceGroup, appSettingPath, { subscriptionId, slot });
             core.info('Removing file');
             fs_1.default.rmSync(appSettingPath, { force: true });
         });
@@ -838,6 +841,92 @@ exports.AppSettingsProviderFactory = AppSettingsProviderFactory;
 
 /***/ }),
 
+/***/ 64668:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AzureResourceStrategyFactory = exports.FunctionAppStrategy = exports.WebAppStrategy = void 0;
+const azureUtility_1 = __nccwpck_require__(86885);
+class WebAppStrategy {
+    listAppSettings(name, resourceGroup, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.webAppListAppSettings)(name, resourceGroup, options);
+        });
+    }
+    setAppSettings(name, resourceGroup, appSettingPath, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.webAppSetAppSettings)(name, resourceGroup, appSettingPath, options);
+        });
+    }
+    listConnectionStrings(name, resourceGroup, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.webAppListConnectionStrings)(name, resourceGroup, options);
+        });
+    }
+    setConnectionStrings(name, resourceGroup, appSettings, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.webAppSetConnectionStrings)(name, resourceGroup, appSettings, options);
+        });
+    }
+    swap(name, resourceGroup, slot, targetSlot, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.webAppSwap)(name, resourceGroup, slot, targetSlot, options);
+        });
+    }
+}
+exports.WebAppStrategy = WebAppStrategy;
+class FunctionAppStrategy {
+    listAppSettings(name, resourceGroup, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.functionAppListAppSettings)(name, resourceGroup, options);
+        });
+    }
+    setAppSettings(name, resourceGroup, appSettingPath, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.functionAppSetAppSettings)(name, resourceGroup, appSettingPath, options);
+        });
+    }
+    listConnectionStrings(name, resourceGroup, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.functionAppListConnectionStrings)(name, resourceGroup, options);
+        });
+    }
+    setConnectionStrings(name, resourceGroup, appSettings, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.functionAppSetConnectionStrings)(name, resourceGroup, appSettings, options);
+        });
+    }
+    swap(name, resourceGroup, slot, targetSlot, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (0, azureUtility_1.functionAppSwap)(name, resourceGroup, slot, targetSlot, options);
+        });
+    }
+}
+exports.FunctionAppStrategy = FunctionAppStrategy;
+class AzureResourceStrategyFactory {
+    static create(swapAppService) {
+        if (swapAppService.resourceType === 'functionapp') {
+            return new FunctionAppStrategy();
+        }
+        return new WebAppStrategy();
+    }
+}
+exports.AzureResourceStrategyFactory = AzureResourceStrategyFactory;
+
+
+/***/ }),
+
 /***/ 14256:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -873,8 +962,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(37484));
-const azureUtility_1 = __nccwpck_require__(86885);
 const AppSettingsBase_1 = __importStar(__nccwpck_require__(75309));
+const AzureResourceStrategy_1 = __nccwpck_require__(64668);
 class ConnectionStrings extends AppSettingsBase_1.default {
     constructor(swapAppService, options) {
         super(swapAppService, AppSettingsBase_1.AppSettingsType.ConnectionStrings, options);
@@ -886,9 +975,10 @@ class ConnectionStrings extends AppSettingsBase_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             core.info('Listing App Setting from Azure Web App (Azure App Service) ...');
             const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
+            const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
             [this.source, this.target] = yield Promise.all([
-                (0, azureUtility_1.webAppListConnectionStrings)(name, resourceGroup, { subscriptionId, slot }),
-                (0, azureUtility_1.webAppListConnectionStrings)(name, resourceGroup, { subscriptionId, slot: targetSlot }),
+                strategy.listConnectionStrings(name, resourceGroup, { subscriptionId, slot }),
+                strategy.listConnectionStrings(name, resourceGroup, { subscriptionId, slot: targetSlot }),
             ]);
             return this;
         });
@@ -898,7 +988,8 @@ class ConnectionStrings extends AppSettingsBase_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const { name, resourceGroup, subscriptionId } = this.swapAppService;
             core.info('Start set ConnectionString');
-            yield (0, azureUtility_1.webAppSetConnectionStrings)(name, resourceGroup, appSettings, { subscriptionId, slot });
+            const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
+            yield strategy.setConnectionStrings(name, resourceGroup, appSettings, { subscriptionId, slot });
         });
     }
 }

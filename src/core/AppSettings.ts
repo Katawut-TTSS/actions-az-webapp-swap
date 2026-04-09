@@ -2,8 +2,8 @@ import * as core from '@actions/core';
 import { IAppSetting, ISwapAppService, SlotType } from '../interfaces';
 import path from 'path';
 import fs from 'fs';
-import { webAppListAppSettings, webAppSetAppSettings } from '../utils/azureUtility';
 import AppSettingsBase, { AppSettingsType, IAppSettingOption } from './AppSettingsBase';
+import { AzureResourceStrategyFactory } from './AzureResourceStrategy';
 
 export default class AppSettings extends AppSettingsBase {
   constructor(swapAppService: ISwapAppService, options?: Partial<IAppSettingOption>) {
@@ -14,9 +14,10 @@ export default class AppSettings extends AppSettingsBase {
   public async list() {
     core.info('Listing App Setting from Azure Web App (Azure App Service) ...');
     const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
+    const strategy = AzureResourceStrategyFactory.create(this.swapAppService);
     [this.source, this.target] = await Promise.all([
-      webAppListAppSettings(name, resourceGroup, { subscriptionId, slot }),
-      webAppListAppSettings(name, resourceGroup, { subscriptionId, slot: targetSlot }),
+      strategy.listAppSettings(name, resourceGroup, { subscriptionId, slot }),
+      strategy.listAppSettings(name, resourceGroup, { subscriptionId, slot: targetSlot }),
     ]);
     return this;
   }
@@ -29,7 +30,8 @@ export default class AppSettings extends AppSettingsBase {
     if (!fs.existsSync(workingDirectory)) fs.mkdirSync(workingDirectory, { recursive: true });
     fs.writeFileSync(appSettingPath, JSON.stringify(appSettings), defaultEncoding);
     core.info('Start set app Setting');
-    await webAppSetAppSettings(name, resourceGroup, appSettingPath, { subscriptionId, slot });
+    const strategy = AzureResourceStrategyFactory.create(this.swapAppService);
+    await strategy.setAppSettings(name, resourceGroup, appSettingPath, { subscriptionId, slot });
     core.info('Removing file');
     fs.rmSync(appSettingPath, { force: true });
   }
