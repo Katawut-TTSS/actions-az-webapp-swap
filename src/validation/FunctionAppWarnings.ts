@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { IAppSetting, ISwapAppService } from '../interfaces';
+import { ISwapAppService } from '../interfaces';
 
 export const FUNCTION_APP_CRITICAL_SETTINGS = [
   'AzureWebJobsStorage',

@@ -12,7 +12,9 @@ export default class AppSettings extends AppSettingsBase {
 
   /** @override */
   public async list() {
-    core.info('Listing App Setting from Azure Web App (Azure App Service) ...');
+    const resourceLabel =
+      this.swapAppService.resourceType === 'functionapp' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
+    core.info(`Listing App Setting from ${resourceLabel} ...`);
     const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
     const strategy = AzureResourceStrategyFactory.create(this.swapAppService);
     [this.source, this.target] = await Promise.all([

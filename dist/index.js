@@ -496,7 +496,8 @@ class AppSettings extends AppSettingsBase_1.default {
     /** @override */
     list() {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info('Listing App Setting from Azure Web App (Azure App Service) ...');
+            const resourceLabel = this.swapAppService.resourceType === 'functionapp' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
+            core.info(`Listing App Setting from ${resourceLabel} ...`);
             const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
             const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
             [this.source, this.target] = yield Promise.all([
@@ -975,7 +976,8 @@ class ConnectionStrings extends AppSettingsBase_1.default {
     /** @override */
     list() {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info('Listing App Setting from Azure Web App (Azure App Service) ...');
+            const resourceLabel = this.swapAppService.resourceType === 'functionapp' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
+            core.info(`Listing Connection Strings from ${resourceLabel} ...`);
             const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
             const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
             [this.source, this.target] = yield Promise.all([
