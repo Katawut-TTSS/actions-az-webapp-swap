@@ -5,9 +5,6 @@ export const FUNCTION_APP_CRITICAL_SETTINGS = [
   'AzureWebJobsStorage',
   'FUNCTIONS_WORKER_RUNTIME',
   'FUNCTIONS_EXTENSION_VERSION',
-];
-
-export const FUNCTION_APP_NON_SLOT_SETTINGS = [
   'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
   'WEBSITE_CONTENTSHARE',
 ];
@@ -34,13 +31,6 @@ export function warnFunctionAppCriticalSettings(
       core.warning(
         `Function App critical setting '${criticalSetting}' is not marked as slotSetting. Swapping this setting may cause issues.`
       );
-    }
-  }
-
-  for (const nonSlotSetting of FUNCTION_APP_NON_SLOT_SETTINGS) {
-    const found = appSettingsByName.get(nonSlotSetting);
-    if (found && found.slotSetting) {
-      core.warning(`Function App setting '${nonSlotSetting}' should not be marked as slotSetting.`);
     }
   }
 }

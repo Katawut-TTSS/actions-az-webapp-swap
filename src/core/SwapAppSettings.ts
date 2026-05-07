@@ -11,10 +11,6 @@ import { findAppSettingName } from '../utils/swapAppSettingsUtility';
 import { AppSettingsType } from './AppSettingsBase';
 
 const { FallbackValue } = constants;
-const FUNCTION_APP_NON_SLOT_SETTINGS = new Set([
-  'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
-  'WEBSITE_CONTENTSHARE',
-]);
 
 export default class SwapAppSettings {
   constructor(private swapAppService: ISwapAppService) {}
@@ -24,8 +20,6 @@ export default class SwapAppSettings {
    * Using `defaultSlotSetting` and `defaultSensitive` to generate fullfill JSON for non-required field
    */
   public fullfill(appSettings: IAppSetting[], slot: string) {
-    this.normalizeFunctionAppSlotSettings();
-
     if (this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.required)
       core.info(`Cannot fulfill swap app service from giving app setting because all slotSettings is required`);
     if (this.swapAppService.defaultSensitive === DefaultSensitiveEnum.required)
@@ -56,17 +50,12 @@ export default class SwapAppSettings {
     // Prepare Hide value
     const hideValue = this.swapAppService.defaultHideValue === true;
     // Prepare slotSetting
-    let slotSetting: boolean;
-    if (this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.inherit) {
-      slotSetting = appSetting.slotSetting;
-    } else if (this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.false) {
-      slotSetting = false;
-    } else {
-      slotSetting = FallbackValue.slotSetting;
-    }
-
-    slotSetting = this.normalizeFunctionAppSlotSetting(appSetting.name, slotSetting);
-
+    let slotSetting =
+      this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.inherit
+        ? appSetting.slotSetting
+        : FallbackValue.slotSetting;
+    slotSetting =
+      this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.false ? false : FallbackValue.slotSetting;
     return {
       name: appSetting.name,
       sensitive,
@@ -80,10 +69,7 @@ export default class SwapAppSettings {
   private mergeAppSettings(appSetting: IAppSetting, swapAppSetting: ISwapAppSetting) {
     if (swapAppSetting.baseSlotSetting !== undefined) {
       swapAppSetting.baseSlotSetting = swapAppSetting.baseSlotSetting || appSetting.slotSetting;
-      swapAppSetting.slotSetting = this.normalizeFunctionAppSlotSetting(
-        appSetting.name,
-        swapAppSetting.slotSetting || appSetting.slotSetting
-      );
+      swapAppSetting.slotSetting = swapAppSetting.slotSetting || appSetting.slotSetting;
     } else {
       swapAppSetting.baseSlotSetting = appSetting.slotSetting;
     }
@@ -131,32 +117,12 @@ export default class SwapAppSettings {
       if (foundIndex >= 0) {
         result.push({
           ...appSetting,
-          slotSetting: this.normalizeFunctionAppSlotSetting(
-            appSetting.name,
-            this.swapAppService.appSettings[foundIndex].slotSetting
-          ),
+          slotSetting: this.swapAppService.appSettings[foundIndex].slotSetting,
         });
       } else {
         core.warning(`Cannot apply setting name "${appSetting.name}" in ${this.swapAppService.name}`);
       }
     }
     return result;
-  }
-
-  private normalizeFunctionAppSlotSettings() {
-    if (this.swapAppService.resourceType !== 'function_app') {
-      return;
-    }
-
-    for (const appSetting of this.swapAppService.appSettings) {
-      appSetting.slotSetting = this.normalizeFunctionAppSlotSetting(appSetting.name, appSetting.slotSetting);
-    }
-  }
-
-  private normalizeFunctionAppSlotSetting(name: string, slotSetting: boolean) {
-    if (this.swapAppService.resourceType === 'function_app' && FUNCTION_APP_NON_SLOT_SETTINGS.has(name)) {
-      return false;
-    }
-    return slotSetting;
   }
 }
