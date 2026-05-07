@@ -220,10 +220,12 @@ const constants_1 = __nccwpck_require__(88729);
 const AppSettingsProviderFactory_1 = __nccwpck_require__(79407);
 const AppSettingsBase_1 = __nccwpck_require__(75309);
 const commonUtility_1 = __nccwpck_require__(29621);
+const InputValidation_1 = __importDefault(__nccwpck_require__(47017));
 const { WorkingDirectory, DefaultEncoding } = constants_1.constants;
 class GetDeploySlots {
     constructor(swapAppService) {
         this.swapAppService = swapAppService;
+        this.swapAppService = InputValidation_1.default.validate(this.swapAppService);
     }
     uploadArtifact(artifactName, files) {
         return __awaiter(this, void 0, void 0, function* () {

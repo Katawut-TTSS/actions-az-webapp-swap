@@ -9,6 +9,7 @@ import { constants } from '../constants';
 import { AppSettingsProviderFactory } from '../core/AppSettingsProviderFactory';
 import { AppSettingsType } from '../core/AppSettingsBase';
 import { getArtifactName } from '../utils/commonUtility';
+import InputValidation from '../validation/InputValidation';
 const { WorkingDirectory, DefaultEncoding } = constants;
 
 interface IAppSettingSlots {
@@ -22,7 +23,9 @@ interface IAppSettingsAllSlots {
 }
 
 export class GetDeploySlots {
-  constructor(private swapAppService: ISwapAppService) {}
+  constructor(private swapAppService: ISwapAppService) {
+    this.swapAppService = InputValidation.validate(this.swapAppService);
+  }
 
   private async uploadArtifact(artifactName: string, files: string[]) {
     const artifactClient = new DefaultArtifactClient();
