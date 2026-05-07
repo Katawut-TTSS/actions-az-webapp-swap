@@ -66,9 +66,9 @@ describe('azureUtility', () => {
   });
 
   describe('azureCommands.functionAppListConnectionStrings', () => {
-    it('should produce az functionapp config connection-string list command', () => {
+    it('should produce az webapp config connection-string list command for Function Apps', () => {
       const cmd = azureCommands.functionAppListConnectionStrings('my-func', 'my-rg', {});
-      expect(cmd).toContain('az functionapp config connection-string list');
+      expect(cmd).toContain('az webapp config connection-string list');
       expect(cmd).toContain('--name my-func');
       expect(cmd).toContain('--resource-group my-rg');
     });
@@ -82,9 +82,9 @@ describe('azureUtility', () => {
   describe('azureCommands.functionAppSetConnectionString', () => {
     const appSetting = { name: 'MY_CONN', value: 'Server=tcp:...', type: 'SQLServer' as const, slotSetting: false };
 
-    it('should produce az functionapp config connection-string set command', () => {
+    it('should produce az webapp config connection-string set command for Function Apps', () => {
       const cmd = azureCommands.functionAppSetConnectionString('my-func', 'my-rg', appSetting, {});
-      expect(cmd).toContain('az functionapp config connection-string set');
+      expect(cmd).toContain('az webapp config connection-string set');
       expect(cmd).toContain('--name my-func');
       expect(cmd).toContain('--resource-group my-rg');
       expect(cmd).toContain('--connection-string-type SQLServer');

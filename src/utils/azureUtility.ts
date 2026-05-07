@@ -117,7 +117,7 @@ export const azureCommands = {
   functionAppListConnectionStrings: (name: string, resourceGroup: string, options: AzureCommandOption) => {
     const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
     return stripIndent`
-      az functionapp config connection-string list \\
+      az webapp config connection-string list \\
           --name ${name} \\
           ${azSlotCommand} \\
           ${azSubscriptionCommand} \\
@@ -137,7 +137,7 @@ export const azureCommands = {
     if (appSetting.value === null) throw new Error('Something wrong with implementation, value should not be null');
     const value = appSetting.value.replaceAll('"', '\\"');
     return stripIndent`
-      az functionapp config connection-string set \\
+      az webapp config connection-string set \\
           --name ${name} \\
           ${azSlotCommand} \\
           ${azSubscriptionCommand} \\

@@ -1469,7 +1469,7 @@ exports.azureCommands = {
     functionAppListConnectionStrings: (name, resourceGroup, options) => {
         const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
         return (0, common_tags_1.stripIndent) `
-      az functionapp config connection-string list \\
+      az webapp config connection-string list \\
           --name ${name} \\
           ${azSlotCommand} \\
           ${azSubscriptionCommand} \\
@@ -1484,7 +1484,7 @@ exports.azureCommands = {
             throw new Error('Something wrong with implementation, value should not be null');
         const value = appSetting.value.replaceAll('"', '\\"');
         return (0, common_tags_1.stripIndent) `
-      az functionapp config connection-string set \\
+      az webapp config connection-string set \\
           --name ${name} \\
           ${azSlotCommand} \\
           ${azSubscriptionCommand} \\
