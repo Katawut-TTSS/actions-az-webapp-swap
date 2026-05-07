@@ -1,6 +1,10 @@
 import { expect, test, describe, jest, beforeEach } from '@jest/globals';
 import * as core from '@actions/core';
-import { warnFunctionAppCriticalSettings, FUNCTION_APP_CRITICAL_SETTINGS } from '../src/validation/FunctionAppWarnings';
+import {
+  warnFunctionAppCriticalSettings,
+  FUNCTION_APP_CRITICAL_SETTINGS,
+  FUNCTION_APP_NON_SLOT_SETTINGS,
+} from '../src/validation/FunctionAppWarnings';
 import { DefaultSensitiveEnum, DefaultSlotSettingEnum } from '../src/interfaces';
 
 jest.mock('@actions/core');
@@ -59,7 +63,7 @@ describe('warnFunctionAppCriticalSettings', () => {
       expect(mockWarning.mock.calls).toHaveLength(0);
     });
 
-    test('emits warning only for critical settings not marked as slotSetting', () => {
+    test('emits warnings for missing sticky settings and invalid non-slot settings', () => {
       const appSettings = [
         { name: 'AzureWebJobsStorage', sensitive: false, slotSetting: true },
         { name: 'FUNCTIONS_WORKER_RUNTIME', sensitive: false, slotSetting: false },
@@ -79,8 +83,27 @@ describe('warnFunctionAppCriticalSettings', () => {
         `Function App critical setting 'FUNCTIONS_WORKER_RUNTIME' is not marked as slotSetting. Swapping this setting may cause issues.`,
       ]);
       expect(mockWarning.mock.calls).toContainEqual([
-        `Function App critical setting 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING' is not marked as slotSetting. Swapping this setting may cause issues.`,
+        `Function App setting 'WEBSITE_CONTENTSHARE' should not be marked as slotSetting.`,
       ]);
+    });
+
+    test('emits warning when a Function App non-slot setting is marked as slotSetting', () => {
+      const appSettings = FUNCTION_APP_NON_SLOT_SETTINGS.map(name => ({
+        name,
+        sensitive: false,
+        slotSetting: true,
+      }));
+
+      warnFunctionAppCriticalSettings({
+        ...baseSwapAppService,
+        resourceType: 'function_app',
+        appSettings,
+      });
+
+      expect(mockWarning.mock.calls).toHaveLength(FUNCTION_APP_NON_SLOT_SETTINGS.length);
+      for (const name of FUNCTION_APP_NON_SLOT_SETTINGS) {
+        expect(mockWarning.mock.calls).toContainEqual([`Function App setting '${name}' should not be marked as slotSetting.`]);
+      }
     });
 
     test('does not emit warnings for non-critical settings', () => {

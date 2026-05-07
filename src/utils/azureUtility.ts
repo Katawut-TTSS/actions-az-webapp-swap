@@ -116,6 +116,8 @@ export const azureCommands = {
 
   functionAppListConnectionStrings: (name: string, resourceGroup: string, options: AzureCommandOption) => {
     const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
+    // Azure CLI exposes Function App connection strings under `az webapp config connection-string`,
+    // not under `az functionapp config connection-string`.
     return stripIndent`
       az webapp config connection-string list \\
           --name ${name} \\
@@ -132,6 +134,8 @@ export const azureCommands = {
     options: AzureCommandOption
   ) => {
     const { azSubscriptionCommand, azSlotCommand } = buildAzCommandOptions(options);
+    // Azure CLI exposes Function App connection strings under `az webapp config connection-string`,
+    // not under `az functionapp config connection-string`.
     const slotSettingCommand = appSetting.slotSetting === true ? '--slot-settings' : '--settings';
     const key = appSetting.name.replaceAll('"', '\\"');
     if (appSetting.value === null) throw new Error('Something wrong with implementation, value should not be null');
