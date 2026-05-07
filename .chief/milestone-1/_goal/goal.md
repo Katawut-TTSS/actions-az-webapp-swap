@@ -2,12 +2,12 @@
 
 ## Objective
 
-Add support for Azure Function App deployment slot swaps alongside the existing Azure Web App support. Users declare `resourceType: 'functionapp'` in their config JSON to use Function App CLI commands instead of Web App commands.
+Add support for Azure Function App deployment slot swaps alongside the existing Azure Web App support. Users declare `resourceType: 'function_app'` in their config JSON to use Function App CLI commands instead of Web App commands.
 
 ## Success Criteria
 
-1. Config JSON accepts optional `resourceType` field (`'webapp'` | `'functionapp'`), defaulting to `'webapp'`
-2. When `resourceType: 'functionapp'`, all Azure CLI calls use `az functionapp` instead of `az webapp`
+1. Config JSON accepts optional `resourceType` field (`'webapp'` | `'function_app'`), defaulting to `'webapp'`
+2. When `resourceType: 'function_app'`, all Azure CLI calls use `az function_app` instead of `az webapp`
 3. Strategy pattern cleanly separates resource-type-specific behavior
 4. Commands (`get-deploy-slots`, `set-deploy-slots`, `swap-slots`) use strategy -- no if/else branching
 5. `create-swap-plan` and `clean` commands are unchanged

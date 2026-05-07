@@ -17,18 +17,18 @@ Add the `resourceType` field to the `ISwapAppService` interface and update the Z
 
 ## Steps
 
-1. Add `ResourceType` type alias (`'webapp' | 'functionapp'`) to `src/interfaces/ISwapAppService.ts`
+1. Add `ResourceType` type alias (`'webapp' | 'function_app'`) to `src/interfaces/ISwapAppService.ts`
 2. Add optional `resourceType?: ResourceType` field to `ISwapAppService` interface
 3. Export `ResourceType` from `src/interfaces/index.ts`
-4. Update `SwapAppServiceSchema` in `src/validation/InputValidation.ts` to add `resourceType: z.enum(['webapp', 'functionapp']).optional()`
-5. Add tests for validation: config without `resourceType` passes, with `'webapp'` passes, with `'functionapp'` passes, with invalid value fails
+4. Update `SwapAppServiceSchema` in `src/validation/InputValidation.ts` to add `resourceType: z.enum(['webapp', 'function_app']).optional()`
+5. Add tests for validation: config without `resourceType` passes, with `'webapp'` passes, with `'function_app'` passes, with invalid value fails
 6. Verify existing tests still pass
 
 ## Acceptance Criteria
 
 - [ ] `ResourceType` type is exported from interfaces
 - [ ] `ISwapAppService.resourceType` is optional
-- [ ] Zod validation accepts missing, `'webapp'`, and `'functionapp'` values
+- [ ] Zod validation accepts missing, `'webapp'`, and `'function_app'` values
 - [ ] Zod validation rejects invalid `resourceType` values
 - [ ] All existing tests pass unchanged
 - [ ] New validation tests cover the new field

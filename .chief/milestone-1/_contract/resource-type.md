@@ -5,7 +5,7 @@
 Add optional `resourceType` field to `ISwapAppService`:
 
 ```ts
-export type ResourceType = 'webapp' | 'functionapp';
+export type ResourceType = 'webapp' | 'function_app';
 
 export interface ISwapAppService {
   // ... existing fields ...
@@ -22,7 +22,7 @@ When `resourceType` is omitted or undefined, it defaults to `'webapp'`. This ens
 Update `SwapAppServiceSchema` to accept:
 
 ```ts
-resourceType: z.enum(['webapp', 'functionapp']).optional(),
+resourceType: z.enum(['webapp', 'function_app']).optional(),
 ```
 
 ## Function App CLI Commands
@@ -31,15 +31,15 @@ Parallel to existing `az webapp` commands:
 
 | Web App Command | Function App Command |
 |---|---|
-| `az webapp config appsettings list` | `az functionapp config appsettings list` |
-| `az webapp config appsettings set` | `az functionapp config appsettings set` |
-| `az webapp config connection-string list` | `az functionapp config connection-string list` |
-| `az webapp config connection-string set` | `az functionapp config connection-string set` |
-| `az webapp deployment slot swap` | `az functionapp deployment slot swap` |
+| `az webapp config appsettings list` | `az function_app config appsettings list` |
+| `az webapp config appsettings set` | `az function_app config appsettings set` |
+| `az webapp config connection-string list` | `az function_app config connection-string list` |
+| `az webapp config connection-string set` | `az function_app config connection-string set` |
+| `az webapp deployment slot swap` | `az function_app deployment slot swap` |
 
 ## Function App Warnings
 
-When `resourceType: 'functionapp'`, emit `core.warning()` for these settings if not `slotSetting: true`:
+When `resourceType: 'function_app'`, emit `core.warning()` for these settings if not `slotSetting: true`:
 
 - `AzureWebJobsStorage`
 - `FUNCTIONS_WORKER_RUNTIME`

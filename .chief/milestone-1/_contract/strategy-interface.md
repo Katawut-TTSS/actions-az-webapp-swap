@@ -56,7 +56,7 @@ class AzureResourceStrategyFactory {
 ```
 
 Returns `WebAppStrategy` when `resourceType` is `'webapp'` or undefined.
-Returns `FunctionAppStrategy` when `resourceType` is `'functionapp'`.
+Returns `FunctionAppStrategy` when `resourceType` is `'function_app'`.
 
 ## File Location
 
