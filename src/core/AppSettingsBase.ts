@@ -98,12 +98,12 @@ export default class AppSettingsBase {
     (await this.list()).validate().fullfill().mask().hide();
   }
 
-  public setWebAppSourceSlot() {
-    this.setWebApp(this.source, this.swapAppService.slot);
+  public async setWebAppSourceSlot() {
+    return await this.setWebApp(this.source, this.swapAppService.slot);
   }
 
-  public setWebAppTargetSlot() {
-    this.setWebApp(this.target, this.swapAppService.targetSlot);
+  public async setWebAppTargetSlot() {
+    return await this.setWebApp(this.target, this.swapAppService.targetSlot);
   }
 
   public getSource() {
