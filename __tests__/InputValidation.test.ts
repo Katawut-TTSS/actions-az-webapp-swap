@@ -17,6 +17,7 @@ test('InputValidation.validate appSettings is undefined should return appSetting
   const expected: Partial<ISwapAppService> = {
     ...swapAppService,
     appSettings: [],
+    connectionStrings: [],
   };
 
   expect(actual).toStrictEqual(expected);
@@ -27,6 +28,7 @@ test('InputValidation.validate connectionStrings is undefined should return conn
 
   const expected: Partial<ISwapAppService> = {
     ...swapAppService,
+    appSettings: [],
     connectionStrings: [],
   };
 
@@ -40,6 +42,7 @@ test('InputValidation.validateArray appSettings is undefined should return appSe
     {
       ...swapAppService,
       appSettings: [],
+      connectionStrings: [],
     },
   ];
 
@@ -52,6 +55,7 @@ test('InputValidation.validateArray connectionStrings is undefined should return
   const expected: Partial<ISwapAppService>[] = [
     {
       ...swapAppService,
+      appSettings: [],
       connectionStrings: [],
     },
   ];
@@ -64,14 +68,24 @@ test('InputValidation.validate resourceType is undefined should pass validation'
   expect(() => InputValidation.validate(input)).not.toThrow();
 });
 
-test('InputValidation.validate resourceType is webapp should pass validation', () => {
-  const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'webapp' as ResourceType };
-  expect(() => InputValidation.validate(input)).not.toThrow();
+test('InputValidation.validate resourceType is web_app should pass validation', () => {
+  const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'web_app' as ResourceType };
+  expect(InputValidation.validate(input).resourceType).toBe('web_app');
 });
 
-test('InputValidation.validate resourceType is functionapp should pass validation', () => {
-  const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'functionapp' as ResourceType };
-  expect(() => InputValidation.validate(input)).not.toThrow();
+test('InputValidation.validate resourceType is function_app should pass validation', () => {
+  const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'function_app' as ResourceType };
+  expect(InputValidation.validate(input).resourceType).toBe('function_app');
+});
+
+test('InputValidation.validate legacy webapp alias should throw', () => {
+  const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'webapp' as never };
+  expect(() => InputValidation.validate(input)).toThrow();
+});
+
+test('InputValidation.validate legacy functionapp alias should throw', () => {
+  const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'functionapp' as never };
+  expect(() => InputValidation.validate(input)).toThrow();
 });
 
 test('InputValidation.validate resourceType with invalid value should throw', () => {

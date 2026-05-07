@@ -21,7 +21,7 @@ describe('warnFunctionAppCriticalSettings', () => {
     mockWarning.mockClear();
   });
 
-  describe('when resourceType is functionapp', () => {
+  describe('when resourceType is function_app', () => {
     test('emits warning for each critical setting not marked as slotSetting', () => {
       const appSettings = FUNCTION_APP_CRITICAL_SETTINGS.map(name => ({
         name,
@@ -31,7 +31,7 @@ describe('warnFunctionAppCriticalSettings', () => {
 
       warnFunctionAppCriticalSettings({
         ...baseSwapAppService,
-        resourceType: 'functionapp',
+        resourceType: 'function_app',
         appSettings,
       });
 
@@ -52,7 +52,7 @@ describe('warnFunctionAppCriticalSettings', () => {
 
       warnFunctionAppCriticalSettings({
         ...baseSwapAppService,
-        resourceType: 'functionapp',
+        resourceType: 'function_app',
         appSettings,
       });
 
@@ -70,7 +70,7 @@ describe('warnFunctionAppCriticalSettings', () => {
 
       warnFunctionAppCriticalSettings({
         ...baseSwapAppService,
-        resourceType: 'functionapp',
+        resourceType: 'function_app',
         appSettings,
       });
 
@@ -91,7 +91,7 @@ describe('warnFunctionAppCriticalSettings', () => {
 
       warnFunctionAppCriticalSettings({
         ...baseSwapAppService,
-        resourceType: 'functionapp',
+        resourceType: 'function_app',
         appSettings,
       });
 
@@ -101,7 +101,7 @@ describe('warnFunctionAppCriticalSettings', () => {
     test('does not emit warnings when appSettings is empty', () => {
       warnFunctionAppCriticalSettings({
         ...baseSwapAppService,
-        resourceType: 'functionapp',
+        resourceType: 'function_app',
         appSettings: [],
       });
 
@@ -109,7 +109,7 @@ describe('warnFunctionAppCriticalSettings', () => {
     });
   });
 
-  describe('when resourceType is webapp', () => {
+  describe('when resourceType is web_app', () => {
     test('does not emit any warnings', () => {
       const appSettings = FUNCTION_APP_CRITICAL_SETTINGS.map(name => ({
         name,
@@ -119,7 +119,7 @@ describe('warnFunctionAppCriticalSettings', () => {
 
       warnFunctionAppCriticalSettings({
         ...baseSwapAppService,
-        resourceType: 'webapp',
+        resourceType: 'web_app',
         appSettings,
       });
 

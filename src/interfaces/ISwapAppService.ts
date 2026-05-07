@@ -2,7 +2,7 @@ import { ISwapAppSetting } from './ISwapAppSetting';
 
 export type SlotType = 'source' | 'target';
 
-export type ResourceType = 'webapp' | 'functionapp';
+export type ResourceType = 'web_app' | 'function_app';
 
 export enum DefaultSensitiveEnum {
   true = 'true',

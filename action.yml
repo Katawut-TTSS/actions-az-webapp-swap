@@ -7,7 +7,7 @@ inputs:
     description: 'Operation mode: get-deploy-slots, create-swap-plan, set-deploy-slots, swap-slots, or clean'
   config:
     required: false
-    description: 'JSON configuration for the swap action. Supports an optional resourceType field accepting "webapp" (default) or "functionapp" to control which Azure CLI commands are used and enable Function App-specific warnings.'
+    description: 'JSON configuration for the swap action. Supports an optional resourceType field accepting "web_app" (default) or "function_app".'
   token:
     required: false
     description: 'personal access token'

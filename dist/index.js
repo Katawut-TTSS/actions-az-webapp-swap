@@ -496,7 +496,7 @@ class AppSettings extends AppSettingsBase_1.default {
     /** @override */
     list() {
         return __awaiter(this, void 0, void 0, function* () {
-            const resourceLabel = this.swapAppService.resourceType === 'functionapp' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
+            const resourceLabel = this.swapAppService.resourceType === 'function_app' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
             core.info(`Listing App Setting from ${resourceLabel} ...`);
             const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
             const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
@@ -919,7 +919,7 @@ class FunctionAppStrategy {
 exports.FunctionAppStrategy = FunctionAppStrategy;
 class AzureResourceStrategyFactory {
     static create(swapAppService) {
-        if (swapAppService.resourceType === 'functionapp') {
+        if (swapAppService.resourceType === 'function_app') {
             return new FunctionAppStrategy();
         }
         return new WebAppStrategy();
@@ -976,7 +976,7 @@ class ConnectionStrings extends AppSettingsBase_1.default {
     /** @override */
     list() {
         return __awaiter(this, void 0, void 0, function* () {
-            const resourceLabel = this.swapAppService.resourceType === 'functionapp' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
+            const resourceLabel = this.swapAppService.resourceType === 'function_app' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
             core.info(`Listing Connection Strings from ${resourceLabel} ...`);
             const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
             const strategy = AzureResourceStrategy_1.AzureResourceStrategyFactory.create(this.swapAppService);
@@ -1893,10 +1893,10 @@ exports.FUNCTION_APP_CRITICAL_SETTINGS = [
 ];
 /**
  * Emits core.warning() for each critical Function App setting that is not marked as slotSetting: true.
- * Only runs when resourceType === 'functionapp'. Non-blocking.
+ * Only runs when resourceType === 'function_app'. Non-blocking.
  */
 function warnFunctionAppCriticalSettings(swapAppService) {
-    if (swapAppService.resourceType !== 'functionapp') {
+    if (swapAppService.resourceType !== 'function_app') {
         return;
     }
     const appSettingsByName = new Map();
@@ -1934,21 +1934,19 @@ const AppSettingSchema = zod_1.z.object({
 const SwapAppServiceSchema = zod_1.z.object({
     name: zod_1.z.string(),
     resourceGroup: zod_1.z.string(),
+    subscriptionId: zod_1.z.string().optional(),
     slot: zod_1.z.string(),
     targetSlot: zod_1.z.string(),
     defaultSlotSetting: zod_1.z.nativeEnum(interfaces_1.DefaultSlotSettingEnum),
     defaultSensitive: zod_1.z.nativeEnum(interfaces_1.DefaultSensitiveEnum),
     defaultHideValue: zod_1.z.boolean().optional(),
-    resourceType: zod_1.z.enum(['webapp', 'functionapp']).optional(),
+    resourceType: zod_1.z.enum(['web_app', 'function_app']).optional(),
     appSettings: zod_1.z.array(AppSettingSchema).optional(),
     connectionStrings: zod_1.z.array(AppSettingSchema).optional(),
 });
 class InputValidation {
     static validateArray(swapAppServiceList) {
-        for (let swapAppService of swapAppServiceList) {
-            swapAppService = InputValidation.validate(swapAppService);
-        }
-        return swapAppServiceList;
+        return swapAppServiceList.map((swapAppService) => InputValidation.validate(swapAppService));
     }
     static validate(swapAppService) {
         const result = SwapAppServiceSchema.safeParse(swapAppService);
@@ -1958,11 +1956,12 @@ class InputValidation {
             console.error(JSON.stringify(formatted, null, 2));
             throw new Error(`Input Validation Error at ${swapAppService.name}`);
         }
-        if (!swapAppService.appSettings)
-            swapAppService.appSettings = [];
-        if (!swapAppService.connectionStrings)
-            swapAppService.connectionStrings = [];
-        return swapAppService;
+        const validatedSwapAppService = result.data;
+        if (!validatedSwapAppService.appSettings)
+            validatedSwapAppService.appSettings = [];
+        if (!validatedSwapAppService.connectionStrings)
+            validatedSwapAppService.connectionStrings = [];
+        return validatedSwapAppService;
     }
 }
 exports["default"] = InputValidation;

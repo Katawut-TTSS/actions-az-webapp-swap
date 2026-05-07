@@ -52,13 +52,13 @@ describe('AzureResourceStrategyFactory', () => {
     expect(strategy).toBeInstanceOf(WebAppStrategy);
   });
 
-  it('returns WebAppStrategy when resourceType is webapp', () => {
-    const strategy = AzureResourceStrategyFactory.create({ ...baseSwapAppService, resourceType: 'webapp' });
+  it('returns WebAppStrategy when resourceType is web_app', () => {
+    const strategy = AzureResourceStrategyFactory.create({ ...baseSwapAppService, resourceType: 'web_app' });
     expect(strategy).toBeInstanceOf(WebAppStrategy);
   });
 
-  it('returns FunctionAppStrategy when resourceType is functionapp', () => {
-    const strategy = AzureResourceStrategyFactory.create({ ...baseSwapAppService, resourceType: 'functionapp' });
+  it('returns FunctionAppStrategy when resourceType is function_app', () => {
+    const strategy = AzureResourceStrategyFactory.create({ ...baseSwapAppService, resourceType: 'function_app' });
     expect(strategy).toBeInstanceOf(FunctionAppStrategy);
   });
 });

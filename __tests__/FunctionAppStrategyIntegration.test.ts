@@ -25,14 +25,14 @@ const functionAppService: ISwapAppService = {
   slot: 'staging',
   targetSlot: 'production',
   subscriptionId: 'sub-func-123',
-  resourceType: 'functionapp',
+  resourceType: 'function_app',
   defaultSensitive: DefaultSensitiveEnum.false,
   defaultSlotSetting: DefaultSlotSettingEnum.false,
   appSettings: [],
   connectionStrings: [],
 };
 
-describe('AppSettings uses FunctionAppStrategy for resourceType=functionapp', () => {
+describe('AppSettings uses FunctionAppStrategy for resourceType=function_app', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -57,7 +57,7 @@ describe('AppSettings uses FunctionAppStrategy for resourceType=functionapp', ()
   });
 });
 
-describe('ConnectionStrings uses FunctionAppStrategy for resourceType=functionapp', () => {
+describe('ConnectionStrings uses FunctionAppStrategy for resourceType=function_app', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -96,7 +96,7 @@ describe('ConnectionStrings uses FunctionAppStrategy for resourceType=functionap
   });
 });
 
-describe('SwapSlots uses FunctionAppStrategy for resourceType=functionapp', () => {
+describe('SwapSlots uses FunctionAppStrategy for resourceType=function_app', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

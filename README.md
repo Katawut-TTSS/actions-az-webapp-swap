@@ -23,7 +23,7 @@ To be more clear,
   - Users can reviews changes all app services app settings before swap
   - Users can config which the app setting will be swapped or not.
   - Automatically fix the app setting to be sticked with desired slot following config
-- **Support Azure Function Apps** via `resourceType: "functionapp"` in config
+- **Support Azure Function Apps** via `resourceType: "function_app"` in config
   - Warns when critical Function App settings (`AzureWebJobsStorage`, `FUNCTIONS_WORKER_RUNTIME`, etc.) are not marked as slot-sticky
 - Leverage GitHub Features
   - GitHub Action Matrix for retryable steps
@@ -183,7 +183,7 @@ jobs:
 
 ### Azure Function App Example
 
-To swap slots for an Azure Function App, set `resourceType` to `"functionapp"`:
+To swap slots for an Azure Function App, set `resourceType` to `"function_app"`:
 
 ```json
 [
@@ -192,7 +192,7 @@ To swap slots for an Azure Function App, set `resourceType` to `"functionapp"`:
     "resourceGroup": "rg-function-app",
     "slot": "staging",
     "targetSlot": "production",
-    "resourceType": "functionapp",
+    "resourceType": "function_app",
     "defaultSlotSetting": "true",
     "defaultSensitive": "false",
     "appSettings": [
@@ -212,11 +212,11 @@ To swap slots for an Azure Function App, set `resourceType` to `"functionapp"`:
 ]
 ```
 
-> When `resourceType` is `"functionapp"`, the action will warn if critical Function App settings (`AzureWebJobsStorage`, `FUNCTIONS_WORKER_RUNTIME`, `FUNCTIONS_EXTENSION_VERSION`, `WEBSITE_CONTENTAZUREFILECONNECTIONSTRING`, `WEBSITE_CONTENTSHARE`) are not marked as `slotSetting: true`.
+> When `resourceType` is `"function_app"`, the action will warn if critical Function App settings (`AzureWebJobsStorage`, `FUNCTIONS_WORKER_RUNTIME`, `FUNCTIONS_EXTENSION_VERSION`, `WEBSITE_CONTENTAZUREFILECONNECTIONSTRING`, `WEBSITE_CONTENTSHARE`) are not marked as `slotSetting: true`.
 
 ### Azure Web App Example (default)
 
-Write a JSON config file (when `resourceType` is omitted, it defaults to `"webapp"`):
+Write a JSON config file (when `resourceType` is omitted, it defaults to `"web_app"`):
 
 ```json
 [

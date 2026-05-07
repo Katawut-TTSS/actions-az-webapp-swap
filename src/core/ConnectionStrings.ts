@@ -14,7 +14,7 @@ export default class ConnectionStrings extends AppSettingsBase {
   /** @override */
   public async list() {
     const resourceLabel =
-      this.swapAppService.resourceType === 'functionapp' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
+      this.swapAppService.resourceType === 'function_app' ? 'Azure Function App' : 'Azure Web App (Azure App Service)';
     core.info(`Listing Connection Strings from ${resourceLabel} ...`);
     const { name, resourceGroup, slot, targetSlot, subscriptionId } = this.swapAppService;
     const strategy = AzureResourceStrategyFactory.create(this.swapAppService);

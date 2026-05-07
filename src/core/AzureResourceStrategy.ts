@@ -129,7 +129,7 @@ export class FunctionAppStrategy implements IAzureResourceStrategy {
 
 export class AzureResourceStrategyFactory {
   static create(swapAppService: ISwapAppService): IAzureResourceStrategy {
-    if (swapAppService.resourceType === 'functionapp') {
+    if (swapAppService.resourceType === 'function_app') {
       return new FunctionAppStrategy();
     }
     return new WebAppStrategy();

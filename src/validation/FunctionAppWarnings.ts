@@ -11,12 +11,12 @@ export const FUNCTION_APP_CRITICAL_SETTINGS = [
 
 /**
  * Emits core.warning() for each critical Function App setting that is not marked as slotSetting: true.
- * Only runs when resourceType === 'functionapp'. Non-blocking.
+ * Only runs when resourceType === 'function_app'. Non-blocking.
  */
 export function warnFunctionAppCriticalSettings(
   swapAppService: Pick<ISwapAppService, 'resourceType' | 'appSettings'>
 ): void {
-  if (swapAppService.resourceType !== 'functionapp') {
+  if (swapAppService.resourceType !== 'function_app') {
     return;
   }
 

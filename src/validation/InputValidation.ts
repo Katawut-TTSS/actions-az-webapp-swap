@@ -13,22 +13,20 @@ const AppSettingSchema = z.object({
 const SwapAppServiceSchema = z.object({
   name: z.string(),
   resourceGroup: z.string(),
+  subscriptionId: z.string().optional(),
   slot: z.string(),
   targetSlot: z.string(),
   defaultSlotSetting: z.nativeEnum(DefaultSlotSettingEnum),
   defaultSensitive: z.nativeEnum(DefaultSensitiveEnum),
   defaultHideValue: z.boolean().optional(),
-  resourceType: z.enum(['webapp', 'functionapp']).optional(),
+  resourceType: z.enum(['web_app', 'function_app']).optional(),
   appSettings: z.array(AppSettingSchema).optional(),
   connectionStrings: z.array(AppSettingSchema).optional(),
 });
 
 export default class InputValidation {
   public static validateArray(swapAppServiceList: Partial<ISwapAppService>[]): ISwapAppService[] {
-    for (let swapAppService of swapAppServiceList) {
-      swapAppService = InputValidation.validate(swapAppService);
-    }
-    return swapAppServiceList as ISwapAppService[];
+    return swapAppServiceList.map((swapAppService) => InputValidation.validate(swapAppService));
   }
 
   public static validate(swapAppService: Partial<ISwapAppService>): ISwapAppService {
@@ -40,8 +38,9 @@ export default class InputValidation {
       throw new Error(`Input Validation Error at ${swapAppService.name}`);
     }
 
-    if (!swapAppService.appSettings) swapAppService.appSettings = [];
-    if (!swapAppService.connectionStrings) swapAppService.connectionStrings = [];
-    return swapAppService as ISwapAppService;
+    const validatedSwapAppService = result.data as ISwapAppService;
+    if (!validatedSwapAppService.appSettings) validatedSwapAppService.appSettings = [];
+    if (!validatedSwapAppService.connectionStrings) validatedSwapAppService.connectionStrings = [];
+    return validatedSwapAppService;
   }
 }
