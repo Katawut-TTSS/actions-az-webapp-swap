@@ -103,3 +103,4 @@ azure-sdk-for-js-samples
 secret.json
 
 .claude/settings.local.json
+.agent

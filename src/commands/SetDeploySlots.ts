@@ -10,6 +10,22 @@ export class SetDeploySlots {
   public async execute() {
     core.debug(`Using set-deploy-slots mode`);
     core.info('Getting App Setting from Azure ');
+    if (this.swapAppService.resourceType === 'function_app') {
+      await this.executeForFunctionApp();
+      return;
+    }
+
+    await this.executeForWebApp();
+  }
+
+  private async executeForWebApp() {
+    await Promise.all([
+      this.setAppSettings(AppSettingsType.AppSettings),
+      this.setAppSettings(AppSettingsType.ConnectionStrings),
+    ]);
+  }
+
+  private async executeForFunctionApp() {
     await Promise.all([
       this.setAppSettings(AppSettingsType.AppSettings),
       this.setAppSettings(AppSettingsType.ConnectionStrings),
