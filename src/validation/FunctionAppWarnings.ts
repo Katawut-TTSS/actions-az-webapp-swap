@@ -7,10 +7,7 @@ export const FUNCTION_APP_CRITICAL_SETTINGS = [
   'FUNCTIONS_EXTENSION_VERSION',
 ];
 
-export const FUNCTION_APP_NON_SLOT_SETTINGS = [
-  'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
-  'WEBSITE_CONTENTSHARE',
-];
+export const FUNCTION_APP_NON_SLOT_SETTINGS = ['WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'WEBSITE_CONTENTSHARE'];
 
 /**
  * Emits core.warning() for each critical Function App setting that is not marked as slotSetting: true.

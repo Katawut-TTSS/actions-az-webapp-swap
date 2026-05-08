@@ -26,10 +26,8 @@ export class SetDeploySlots {
   }
 
   private async executeForFunctionApp() {
-    await Promise.all([
-      this.setAppSettings(AppSettingsType.AppSettings),
-      this.setAppSettings(AppSettingsType.ConnectionStrings),
-    ]);
+    await this.setFunctionAppSettings(AppSettingsType.AppSettings);
+    await this.setFunctionAppSettings(AppSettingsType.ConnectionStrings);
   }
 
   private async setAppSettings(type: AppSettingsType) {
@@ -37,5 +35,15 @@ export class SetDeploySlots {
     (await appSetting.list()).fullfill().apply();
     core.info('Setting App Setting to Azure');
     await Promise.all([appSetting.setWebAppSourceSlot(), appSetting.setWebAppTargetSlot()]);
+  }
+
+  private async setFunctionAppSettings(type: AppSettingsType) {
+    const appSetting = AppSettingsProviderFactory.getAppSettingsProvider(type, this.swapAppService);
+    const { slot, targetSlot } = this.swapAppService;
+
+    (await appSetting.list()).fullfill().apply();
+    core.info('Setting App Setting to Azure sequentially for Function App');
+    await appSetting.setWebApp(appSetting.getSource(), slot);
+    await appSetting.setWebApp(appSetting.getTarget(), targetSlot);
   }
 }

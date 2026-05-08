@@ -342,10 +342,25 @@ class SetDeploySlots {
         return __awaiter(this, void 0, void 0, function* () {
             core.debug(`Using set-deploy-slots mode`);
             core.info('Getting App Setting from Azure ');
+            if (this.swapAppService.resourceType === 'function_app') {
+                yield this.executeForFunctionApp();
+                return;
+            }
+            yield this.executeForWebApp();
+        });
+    }
+    executeForWebApp() {
+        return __awaiter(this, void 0, void 0, function* () {
             yield Promise.all([
                 this.setAppSettings(AppSettingsBase_1.AppSettingsType.AppSettings),
                 this.setAppSettings(AppSettingsBase_1.AppSettingsType.ConnectionStrings),
             ]);
+        });
+    }
+    executeForFunctionApp() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.setFunctionAppSettings(AppSettingsBase_1.AppSettingsType.AppSettings);
+            yield this.setFunctionAppSettings(AppSettingsBase_1.AppSettingsType.ConnectionStrings);
         });
     }
     setAppSettings(type) {
@@ -354,6 +369,16 @@ class SetDeploySlots {
             (yield appSetting.list()).fullfill().apply();
             core.info('Setting App Setting to Azure');
             yield Promise.all([appSetting.setWebAppSourceSlot(), appSetting.setWebAppTargetSlot()]);
+        });
+    }
+    setFunctionAppSettings(type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appSetting = AppSettingsProviderFactory_1.AppSettingsProviderFactory.getAppSettingsProvider(type, this.swapAppService);
+            const { slot, targetSlot } = this.swapAppService;
+            (yield appSetting.list()).fullfill().apply();
+            core.info('Setting App Setting to Azure sequentially for Function App');
+            yield appSetting.setWebApp(appSetting.getSource(), slot);
+            yield appSetting.setWebApp(appSetting.getTarget(), targetSlot);
         });
     }
 }

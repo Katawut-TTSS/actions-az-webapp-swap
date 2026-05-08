@@ -11,10 +11,7 @@ import { findAppSettingName } from '../utils/swapAppSettingsUtility';
 import { AppSettingsType } from './AppSettingsBase';
 
 const { FallbackValue } = constants;
-const FUNCTION_APP_NON_SLOT_SETTINGS = new Set([
-  'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
-  'WEBSITE_CONTENTSHARE',
-]);
+const FUNCTION_APP_NON_SLOT_SETTINGS = new Set(['WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'WEBSITE_CONTENTSHARE']);
 
 export default class SwapAppSettings {
   constructor(private swapAppService: ISwapAppService) {}

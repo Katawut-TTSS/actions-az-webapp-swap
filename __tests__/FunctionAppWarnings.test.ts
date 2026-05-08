@@ -102,7 +102,9 @@ describe('warnFunctionAppCriticalSettings', () => {
 
       expect(mockWarning.mock.calls).toHaveLength(FUNCTION_APP_NON_SLOT_SETTINGS.length);
       for (const name of FUNCTION_APP_NON_SLOT_SETTINGS) {
-        expect(mockWarning.mock.calls).toContainEqual([`Function App setting '${name}' should not be marked as slotSetting.`]);
+        expect(mockWarning.mock.calls).toContainEqual([
+          `Function App setting '${name}' should not be marked as slotSetting.`,
+        ]);
       }
     });
 
