@@ -1,0 +1,36 @@
+[
+  {
+    "name": "my-swap-app-test-01",
+    "resourceGroup": "rg-swap-app-test",
+    "slot": "staging",
+    "targetSlot": "production",
+    "defaultSlotSetting": "true",
+    "defaultSensitive": "false",
+    "defaultHideValue": true,
+    "appSettings": [
+      {
+        "name": "data1",
+        "sensitive": false,
+        "slotSetting": true
+      },
+      {
+        "name": "data2",
+        "sensitive": false,
+        "slotSetting": true,
+        "hideValue": false
+      },
+      {
+        "name": "data3",
+        "sensitive": true,
+        "slotSetting": true
+      }
+    ],
+    "connectionStrings": [
+      {
+        "name": "data4",
+        "sensitive": true,
+        "slotSetting": true
+      }
+    ]
+  }
+]

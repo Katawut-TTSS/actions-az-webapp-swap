@@ -1,0 +1,27 @@
+name: 'build-test'
+on: # rebuild any PRs and main branch changes
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - 'releases/*'
+env:
+  config_dir: .github/workflows/config
+
+jobs:
+  build: # make sure build/ci work properly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          npm install
+      - run: |
+          npm run all
+      - run: |
+          npm run test:coverage
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
