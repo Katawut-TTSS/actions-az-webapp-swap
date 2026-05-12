@@ -1,0 +1,160 @@
+import {
+  ISwapAppService,
+  IAppSetting,
+  DefaultSlotSettingEnum,
+  DefaultSensitiveEnum,
+  ISwapAppSetting,
+} from '../interfaces';
+import * as core from '@actions/core';
+import { constants } from '../constants';
+import { findAppSettingName } from '../utils/swapAppSettingsUtility';
+import { AppSettingsType } from './AppSettingsBase';
+
+const { FallbackValue } = constants;
+const FUNCTION_APP_NON_SLOT_SETTINGS = new Set([
+  'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+  'WEBSITE_CONTENTSHARE',
+]);
+
+export default class SwapAppSettings {
+  constructor(private swapAppService: ISwapAppService) {}
+
+  /**
+   * Expected result
+   * Using `defaultSlotSetting` and `defaultSensitive` to generate fullfill JSON for non-required field
+   */
+  public fullfill(appSettings: IAppSetting[], slot: string) {
+    this.normalizeFunctionAppSlotSettings();
+
+    if (this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.required)
+      core.info(`Cannot fulfill swap app service from giving app setting because all slotSettings is required`);
+    if (this.swapAppService.defaultSensitive === DefaultSensitiveEnum.required)
+      core.info(`Cannot fulfill swap app service from giving app setting because all sensitive is required`);
+
+    for (const appSetting of appSettings) {
+      const found = findAppSettingName(appSetting.name, this.swapAppService.appSettings);
+      if (found < 0) {
+        this.swapAppService.appSettings.push(this.generateAppSetting(appSetting));
+      } else {
+        // If existing it will merge between 2 app settings
+        let foundAppSetting = this.swapAppService.appSettings[found];
+        foundAppSetting = this.mergeAppSettings(appSetting, foundAppSetting);
+      }
+    }
+
+    for (const appSetting of this.swapAppService.appSettings) {
+      if (appSetting.slots) appSetting.slots.push(slot);
+      else appSetting.slots = [slot];
+    }
+    return this.swapAppService;
+  }
+
+  private generateAppSetting(appSetting: IAppSetting): ISwapAppSetting {
+    // Prepare Sensitive
+    const sensitive =
+      this.swapAppService.defaultSensitive === DefaultSensitiveEnum.false ? false : FallbackValue.sensitive;
+    // Prepare Hide value
+    const hideValue = this.swapAppService.defaultHideValue === true;
+    // Prepare slotSetting
+    let slotSetting: boolean;
+    if (this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.inherit) {
+      slotSetting = appSetting.slotSetting;
+    } else if (this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.false) {
+      slotSetting = false;
+    } else {
+      slotSetting = FallbackValue.slotSetting;
+    }
+    slotSetting = this.normalizeFunctionAppSlotSetting(appSetting.name, slotSetting);
+    return {
+      name: appSetting.name,
+      sensitive,
+      slotSetting,
+      hideValue,
+      // It will use for merging between 2 app settings
+      baseSlotSetting: appSetting.slotSetting,
+    };
+  }
+
+  private mergeAppSettings(appSetting: IAppSetting, swapAppSetting: ISwapAppSetting) {
+    if (swapAppSetting.baseSlotSetting !== undefined) {
+      swapAppSetting.baseSlotSetting = swapAppSetting.baseSlotSetting || appSetting.slotSetting;
+      swapAppSetting.slotSetting = this.normalizeFunctionAppSlotSetting(
+        appSetting.name,
+        swapAppSetting.slotSetting || appSetting.slotSetting
+      );
+    } else {
+      swapAppSetting.baseSlotSetting = appSetting.slotSetting;
+    }
+    return swapAppSetting;
+  }
+
+  public simulateSwappedAppSettings(
+    type: AppSettingsType,
+    sourceSlotAppSettings: IAppSetting[],
+    targetSlotAppSettings: IAppSetting[]
+  ): IAppSetting[] {
+    /**
+     * If SlotSetting = True,  Get value from source Slot,
+     * If SlotSetting = Flase, Get value from target Slot.
+     */
+    const result: IAppSetting[] = [];
+    for (const swapAppSettings of this.swapAppService.appSettings) {
+      let appSetting: Record<string, any> = { name: swapAppSettings.name, slotSetting: swapAppSettings.slotSetting };
+
+      const foundSourceIndex = findAppSettingName(swapAppSettings.name, sourceSlotAppSettings);
+      const foundTargetIndex = findAppSettingName(swapAppSettings.name, targetSlotAppSettings);
+      if (swapAppSettings.slotSetting === true) {
+        if (foundSourceIndex >= 0) {
+          if (type === AppSettingsType.ConnectionStrings)
+            appSetting.type = sourceSlotAppSettings[foundSourceIndex].type;
+          appSetting.value = sourceSlotAppSettings[foundSourceIndex].value;
+          result.push(appSetting as IAppSetting);
+        }
+      } else {
+        if (foundTargetIndex >= 0) {
+          if (type === AppSettingsType.ConnectionStrings)
+            appSetting.type = targetSlotAppSettings[foundTargetIndex].type;
+          appSetting.value = targetSlotAppSettings[foundTargetIndex].value;
+          result.push(appSetting as IAppSetting);
+        }
+      }
+    }
+    return result;
+  }
+
+  public applyAppSetting(appSettings: IAppSetting[]): IAppSetting[] {
+    const result: IAppSetting[] = [];
+    for (const appSetting of appSettings) {
+      const foundIndex = findAppSettingName(appSetting.name, this.swapAppService.appSettings);
+      if (foundIndex >= 0) {
+        result.push({
+          ...appSetting,
+          slotSetting: this.normalizeFunctionAppSlotSetting(
+            appSetting.name,
+            this.swapAppService.appSettings[foundIndex].slotSetting
+          ),
+        });
+      } else {
+        core.warning(`Cannot apply setting name "${appSetting.name}" in ${this.swapAppService.name}`);
+      }
+    }
+    return result;
+  }
+
+  private normalizeFunctionAppSlotSettings() {
+    if (this.swapAppService.resourceType !== 'function_app') {
+      return;
+    }
+
+    for (const appSetting of this.swapAppService.appSettings) {
+      appSetting.slotSetting = this.normalizeFunctionAppSlotSetting(appSetting.name, appSetting.slotSetting);
+    }
+  }
+
+  private normalizeFunctionAppSlotSetting(name: string, slotSetting: boolean) {
+    if (this.swapAppService.resourceType === 'function_app' && FUNCTION_APP_NON_SLOT_SETTINGS.has(name)) {
+      return false;
+    }
+    return slotSetting;
+  }
+}
