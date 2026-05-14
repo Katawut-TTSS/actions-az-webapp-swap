@@ -1034,6 +1034,7 @@ const core = __importStar(__nccwpck_require__(37484));
 const constants_1 = __nccwpck_require__(88729);
 const swapAppSettingsUtility_1 = __nccwpck_require__(28125);
 const AppSettingsBase_1 = __nccwpck_require__(75309);
+const FunctionAppWarnings_1 = __nccwpck_require__(63504);
 const { FallbackValue } = constants_1.constants;
 class SwapAppSettings {
     constructor(swapAppService) {
@@ -1077,7 +1078,12 @@ class SwapAppSettings {
             ? appSetting.slotSetting
             : FallbackValue.slotSetting;
         slotSetting =
-            this.swapAppService.defaultSlotSetting === interfaces_1.DefaultSlotSettingEnum.false ? false : FallbackValue.slotSetting;
+            this.swapAppService.defaultSlotSetting === interfaces_1.DefaultSlotSettingEnum.false
+                ? false
+                : this.swapAppService.defaultSlotSetting === interfaces_1.DefaultSlotSettingEnum.true
+                    ? true
+                    : slotSetting;
+        slotSetting = (0, FunctionAppWarnings_1.normalizeFunctionAppSlotSetting)(this.swapAppService.resourceType, appSetting.name, slotSetting);
         return {
             name: appSetting.name,
             sensitive,
@@ -1095,6 +1101,7 @@ class SwapAppSettings {
         else {
             swapAppSetting.baseSlotSetting = appSetting.slotSetting;
         }
+        swapAppSetting.slotSetting = (0, FunctionAppWarnings_1.normalizeFunctionAppSlotSetting)(this.swapAppService.resourceType, appSetting.name, swapAppSetting.slotSetting);
         return swapAppSetting;
     }
     simulateSwappedAppSettings(type, sourceSlotAppSettings, targetSlotAppSettings) {
@@ -1131,7 +1138,7 @@ class SwapAppSettings {
         for (const appSetting of appSettings) {
             const foundIndex = (0, swapAppSettingsUtility_1.findAppSettingName)(appSetting.name, this.swapAppService.appSettings);
             if (foundIndex >= 0) {
-                result.push(Object.assign(Object.assign({}, appSetting), { slotSetting: this.swapAppService.appSettings[foundIndex].slotSetting }));
+                result.push(Object.assign(Object.assign({}, appSetting), { slotSetting: (0, FunctionAppWarnings_1.normalizeFunctionAppSlotSetting)(this.swapAppService.resourceType, appSetting.name, this.swapAppService.appSettings[foundIndex].slotSetting) }));
             }
             else {
                 core.warning(`Cannot apply setting name "${appSetting.name}" in ${this.swapAppService.name}`);
@@ -1884,15 +1891,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.warnFunctionAppCriticalSettings = exports.FUNCTION_APP_CRITICAL_SETTINGS = void 0;
+exports.warnFunctionAppCriticalSettings = exports.normalizeFunctionAppSlotSetting = exports.FUNCTION_APP_NON_SLOT_SETTINGS = exports.FUNCTION_APP_CRITICAL_SETTINGS = void 0;
 const core = __importStar(__nccwpck_require__(37484));
 exports.FUNCTION_APP_CRITICAL_SETTINGS = [
     'AzureWebJobsStorage',
     'FUNCTIONS_WORKER_RUNTIME',
     'FUNCTIONS_EXTENSION_VERSION',
-    'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
     'WEBSITE_CONTENTSHARE',
 ];
+exports.FUNCTION_APP_NON_SLOT_SETTINGS = ['WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'];
+function normalizeFunctionAppSlotSetting(resourceType, settingName, slotSetting) {
+    if (resourceType === 'function_app' && exports.FUNCTION_APP_NON_SLOT_SETTINGS.includes(settingName)) {
+        return false;
+    }
+    return slotSetting;
+}
+exports.normalizeFunctionAppSlotSetting = normalizeFunctionAppSlotSetting;
 /**
  * Emits core.warning() for each critical Function App setting that is not marked as slotSetting: true.
  * Only runs when resourceType === 'function_app'. Non-blocking.
@@ -1904,6 +1918,12 @@ function warnFunctionAppCriticalSettings(swapAppService) {
     const appSettingsByName = new Map();
     for (const setting of swapAppService.appSettings) {
         appSettingsByName.set(setting.name, { slotSetting: setting.slotSetting === true });
+    }
+    for (const nonSlotSetting of exports.FUNCTION_APP_NON_SLOT_SETTINGS) {
+        const found = appSettingsByName.get(nonSlotSetting);
+        if (found === null || found === void 0 ? void 0 : found.slotSetting) {
+            core.warning(`Function App setting '${nonSlotSetting}' cannot be marked as slotSetting. The action will treat it as slotSetting: false.`);
+        }
     }
     for (const criticalSetting of exports.FUNCTION_APP_CRITICAL_SETTINGS) {
         const found = appSettingsByName.get(criticalSetting);

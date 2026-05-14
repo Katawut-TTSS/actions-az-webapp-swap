@@ -26,7 +26,7 @@ const SwapAppServiceSchema = z.object({
 
 export default class InputValidation {
   public static validateArray(swapAppServiceList: Partial<ISwapAppService>[]): ISwapAppService[] {
-    return swapAppServiceList.map((swapAppService) => InputValidation.validate(swapAppService));
+    return swapAppServiceList.map(swapAppService => InputValidation.validate(swapAppService));
   }
 
   public static validate(swapAppService: Partial<ISwapAppService>): ISwapAppService {

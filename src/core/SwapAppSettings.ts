@@ -59,8 +59,8 @@ export default class SwapAppSettings {
       this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.false
         ? false
         : this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.true
-          ? true
-          : slotSetting;
+        ? true
+        : slotSetting;
     slotSetting = normalizeFunctionAppSlotSetting(this.swapAppService.resourceType, appSetting.name, slotSetting);
     return {
       name: appSetting.name,
