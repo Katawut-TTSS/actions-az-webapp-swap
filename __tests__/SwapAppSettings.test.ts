@@ -260,6 +260,41 @@ test('test SwapAppSettings slotSettings for Function App setting that cannot be 
   });
 });
 
+test('test SwapAppSettings slotSettings for Function App content share setting', () => {
+  const sharedConfig = {
+    ...globalConfig,
+    defaultSensitive: DefaultSensitiveEnum.false,
+    defaultSlotSetting: DefaultSlotSettingEnum.true,
+    resourceType: 'function_app' as const,
+  };
+  const swapAppService: ISwapAppService = {
+    ...sharedConfig,
+    connectionStrings: [],
+    appSettings: [],
+  };
+  const appSettings: IAppSetting[] = [
+    {
+      name: 'WEBSITE_CONTENTSHARE',
+      value: 'content-share-name',
+      slotSetting: false,
+    },
+  ];
+
+  expect(new SwapAppSettings(swapAppService).fullfill(appSettings, 'production')).toStrictEqual({
+    ...sharedConfig,
+    appSettings: [
+      {
+        name: 'WEBSITE_CONTENTSHARE',
+        sensitive: false,
+        slotSetting: false,
+        baseSlotSetting: false,
+        slots: ['production'],
+        hideValue: false,
+      },
+    ],
+  });
+});
+
 test('test SwapAppSettings sensitive if one app setting is missing (defaultSensitive = true)', () => {
   const sharedConfig = {
     ...globalConfig,
@@ -1042,6 +1077,41 @@ test('test SwapAppSettings.applyAppSetting normalizes Function App setting that 
     {
       name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
       value: 'UseDevelopmentStorage=true',
+      slotSetting: false,
+    },
+  ]);
+});
+
+test('test SwapAppSettings.applyAppSetting normalizes Function App content share setting', () => {
+  const sharedConfig = {
+    ...globalConfig,
+    defaultSensitive: DefaultSensitiveEnum.false,
+    defaultSlotSetting: DefaultSlotSettingEnum.false,
+    resourceType: 'function_app' as const,
+  };
+  const swapAppService: ISwapAppService = {
+    ...sharedConfig,
+    connectionStrings: [],
+    appSettings: [
+      {
+        name: 'WEBSITE_CONTENTSHARE',
+        sensitive: false,
+        slotSetting: true,
+      },
+    ],
+  };
+  const appSettings: IAppSetting[] = [
+    {
+      name: 'WEBSITE_CONTENTSHARE',
+      value: 'content-share-name',
+      slotSetting: true,
+    },
+  ];
+
+  expect(new SwapAppSettings(swapAppService).applyAppSetting(appSettings)).toStrictEqual([
+    {
+      name: 'WEBSITE_CONTENTSHARE',
+      value: 'content-share-name',
       slotSetting: false,
     },
   ]);

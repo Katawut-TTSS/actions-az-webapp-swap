@@ -212,9 +212,9 @@ To swap slots for an Azure Function App, set `resourceType` to `"function_app"`:
 ]
 ```
 
-> When `resourceType` is `"function_app"`, the action will warn if critical Function App settings (`AzureWebJobsStorage`, `FUNCTIONS_WORKER_RUNTIME`, `FUNCTIONS_EXTENSION_VERSION`, `WEBSITE_CONTENTSHARE`) are not marked as `slotSetting: true`.
+> When `resourceType` is `"function_app"`, the action will warn if critical Function App settings (`AzureWebJobsStorage`, `FUNCTIONS_WORKER_RUNTIME`, `FUNCTIONS_EXTENSION_VERSION`) are not marked as `slotSetting: true`.
 
-> `WEBSITE_CONTENTAZUREFILECONNECTIONSTRING` is a special case for Azure Function App. Azure does not allow this setting to be marked as a slot setting, so the action will force it to `slotSetting: false` even if your config or default settings would otherwise make it `true`.
+> `WEBSITE_CONTENTAZUREFILECONNECTIONSTRING` and `WEBSITE_CONTENTSHARE` are special cases for Azure Function App. Azure does not allow these settings to be marked as slot settings, so the action will force them to `slotSetting: false` even if your config or default settings would otherwise make them `true`.
 
 ### Azure Web App Example (default)
 

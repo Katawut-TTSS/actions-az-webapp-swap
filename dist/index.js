@@ -1897,9 +1897,11 @@ exports.FUNCTION_APP_CRITICAL_SETTINGS = [
     'AzureWebJobsStorage',
     'FUNCTIONS_WORKER_RUNTIME',
     'FUNCTIONS_EXTENSION_VERSION',
+];
+exports.FUNCTION_APP_NON_SLOT_SETTINGS = [
+    'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
     'WEBSITE_CONTENTSHARE',
 ];
-exports.FUNCTION_APP_NON_SLOT_SETTINGS = ['WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'];
 function normalizeFunctionAppSlotSetting(resourceType, settingName, slotSetting) {
     if (resourceType === 'function_app' && exports.FUNCTION_APP_NON_SLOT_SETTINGS.includes(settingName)) {
         return false;
@@ -1968,7 +1970,7 @@ const SwapAppServiceSchema = zod_1.z.object({
 });
 class InputValidation {
     static validateArray(swapAppServiceList) {
-        return swapAppServiceList.map((swapAppService) => InputValidation.validate(swapAppService));
+        return swapAppServiceList.map(swapAppService => InputValidation.validate(swapAppService));
     }
     static validate(swapAppService) {
         const result = SwapAppServiceSchema.safeParse(swapAppService);

@@ -68,7 +68,6 @@ describe('warnFunctionAppCriticalSettings', () => {
         { name: 'AzureWebJobsStorage', sensitive: false, slotSetting: true },
         { name: 'FUNCTIONS_WORKER_RUNTIME', sensitive: false, slotSetting: false },
         { name: 'FUNCTIONS_EXTENSION_VERSION', sensitive: false, slotSetting: true },
-        { name: 'WEBSITE_CONTENTSHARE', sensitive: false, slotSetting: true },
       ];
 
       warnFunctionAppCriticalSettings({
