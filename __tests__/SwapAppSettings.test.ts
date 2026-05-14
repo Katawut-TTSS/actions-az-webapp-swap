@@ -199,7 +199,7 @@ test('test SwapAppSettings slotSettings if one app setting is missing (defaultSl
     {
       name: 'config_2',
       value: '',
-      slotSetting: true,
+      slotSetting: false,
     },
   ];
   expect(new SwapAppSettings(swapAppService).fullfill(appSettings, 'production')).toStrictEqual({
@@ -216,8 +216,43 @@ test('test SwapAppSettings slotSettings if one app setting is missing (defaultSl
       {
         name: 'config_2',
         sensitive: false,
-        slotSetting: true,
-        baseSlotSetting: true,
+        slotSetting: false,
+        baseSlotSetting: false,
+        slots: ['production'],
+        hideValue: false,
+      },
+    ],
+  });
+});
+
+test('test SwapAppSettings slotSettings for Function App setting that cannot be a slot setting', () => {
+  const sharedConfig = {
+    ...globalConfig,
+    defaultSensitive: DefaultSensitiveEnum.false,
+    defaultSlotSetting: DefaultSlotSettingEnum.true,
+    resourceType: 'function_app' as const,
+  };
+  const swapAppService: ISwapAppService = {
+    ...sharedConfig,
+    connectionStrings: [],
+    appSettings: [],
+  };
+  const appSettings: IAppSetting[] = [
+    {
+      name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+      value: 'UseDevelopmentStorage=true',
+      slotSetting: false,
+    },
+  ];
+
+  expect(new SwapAppSettings(swapAppService).fullfill(appSettings, 'production')).toStrictEqual({
+    ...sharedConfig,
+    appSettings: [
+      {
+        name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+        sensitive: false,
+        slotSetting: false,
+        baseSlotSetting: false,
         slots: ['production'],
         hideValue: false,
       },
@@ -973,6 +1008,41 @@ test('test SwapAppSettings.applyAppSetting', () => {
       name: 'config_2',
       value: 'config_2 val',
       slotSetting: true,
+    },
+  ]);
+});
+
+test('test SwapAppSettings.applyAppSetting normalizes Function App setting that cannot be a slot setting', () => {
+  const sharedConfig = {
+    ...globalConfig,
+    defaultSensitive: DefaultSensitiveEnum.false,
+    defaultSlotSetting: DefaultSlotSettingEnum.false,
+    resourceType: 'function_app' as const,
+  };
+  const swapAppService: ISwapAppService = {
+    ...sharedConfig,
+    connectionStrings: [],
+    appSettings: [
+      {
+        name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+        sensitive: false,
+        slotSetting: true,
+      },
+    ],
+  };
+  const appSettings: IAppSetting[] = [
+    {
+      name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+      value: 'UseDevelopmentStorage=true',
+      slotSetting: true,
+    },
+  ];
+
+  expect(new SwapAppSettings(swapAppService).applyAppSetting(appSettings)).toStrictEqual([
+    {
+      name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+      value: 'UseDevelopmentStorage=true',
+      slotSetting: false,
     },
   ]);
 });

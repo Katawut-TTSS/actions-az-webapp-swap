@@ -9,6 +9,7 @@ import * as core from '@actions/core';
 import { constants } from '../constants';
 import { findAppSettingName } from '../utils/swapAppSettingsUtility';
 import { AppSettingsType } from './AppSettingsBase';
+import { normalizeFunctionAppSlotSetting } from '../validation/FunctionAppWarnings';
 
 const { FallbackValue } = constants;
 
@@ -55,7 +56,12 @@ export default class SwapAppSettings {
         ? appSetting.slotSetting
         : FallbackValue.slotSetting;
     slotSetting =
-      this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.false ? false : FallbackValue.slotSetting;
+      this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.false
+        ? false
+        : this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.true
+          ? true
+          : slotSetting;
+    slotSetting = normalizeFunctionAppSlotSetting(this.swapAppService.resourceType, appSetting.name, slotSetting);
     return {
       name: appSetting.name,
       sensitive,
@@ -73,6 +79,11 @@ export default class SwapAppSettings {
     } else {
       swapAppSetting.baseSlotSetting = appSetting.slotSetting;
     }
+    swapAppSetting.slotSetting = normalizeFunctionAppSlotSetting(
+      this.swapAppService.resourceType,
+      appSetting.name,
+      swapAppSetting.slotSetting
+    );
     return swapAppSetting;
   }
 
@@ -117,7 +128,11 @@ export default class SwapAppSettings {
       if (foundIndex >= 0) {
         result.push({
           ...appSetting,
-          slotSetting: this.swapAppService.appSettings[foundIndex].slotSetting,
+          slotSetting: normalizeFunctionAppSlotSetting(
+            this.swapAppService.resourceType,
+            appSetting.name,
+            this.swapAppService.appSettings[foundIndex].slotSetting
+          ),
         });
       } else {
         core.warning(`Cannot apply setting name "${appSetting.name}" in ${this.swapAppService.name}`);
