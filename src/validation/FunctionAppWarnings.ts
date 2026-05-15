@@ -7,6 +7,7 @@ export const FUNCTION_APP_CRITICAL_SETTINGS = [
   'FUNCTIONS_EXTENSION_VERSION',
 ];
 
+// Azure rejects these Function App content-share settings when they are marked as slot settings.
 export const FUNCTION_APP_NON_SLOT_SETTINGS = ['WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'WEBSITE_CONTENTSHARE'];
 
 export function normalizeFunctionAppSlotSetting(

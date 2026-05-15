@@ -61,6 +61,7 @@ export default class SwapAppSettings {
         : this.swapAppService.defaultSlotSetting === DefaultSlotSettingEnum.true
         ? true
         : slotSetting;
+    // Normalize before persisting merged config so restricted Function App settings never become sticky.
     slotSetting = normalizeFunctionAppSlotSetting(this.swapAppService.resourceType, appSetting.name, slotSetting);
     return {
       name: appSetting.name,
@@ -79,6 +80,7 @@ export default class SwapAppSettings {
     } else {
       swapAppSetting.baseSlotSetting = appSetting.slotSetting;
     }
+    // Merge can still promote a setting to true, so normalize again after combining slot values.
     swapAppSetting.slotSetting = normalizeFunctionAppSlotSetting(
       this.swapAppService.resourceType,
       appSetting.name,
@@ -128,6 +130,7 @@ export default class SwapAppSettings {
       if (foundIndex >= 0) {
         result.push({
           ...appSetting,
+          // Final safeguard before writing the payload used by Azure CLI.
           slotSetting: normalizeFunctionAppSlotSetting(
             this.swapAppService.resourceType,
             appSetting.name,
