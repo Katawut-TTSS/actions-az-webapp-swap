@@ -26,7 +26,10 @@ const SwapAppServiceSchema = z.object({
 
 export default class InputValidation {
   public static validateArray(swapAppServiceList: Partial<ISwapAppService>[]): ISwapAppService[] {
-    return swapAppServiceList.map((swapAppService) => InputValidation.validate(swapAppService));
+    for (let swapAppService of swapAppServiceList) {
+      swapAppService = InputValidation.validate(swapAppService);
+    }
+    return swapAppServiceList as ISwapAppService[];
   }
 
   public static validate(swapAppService: Partial<ISwapAppService>): ISwapAppService {
@@ -38,9 +41,8 @@ export default class InputValidation {
       throw new Error(`Input Validation Error at ${swapAppService.name}`);
     }
 
-    const validatedSwapAppService = result.data as ISwapAppService;
-    if (!validatedSwapAppService.appSettings) validatedSwapAppService.appSettings = [];
-    if (!validatedSwapAppService.connectionStrings) validatedSwapAppService.connectionStrings = [];
-    return validatedSwapAppService;
+    if (!swapAppService.appSettings) swapAppService.appSettings = [];
+    if (!swapAppService.connectionStrings) swapAppService.connectionStrings = [];
+    return swapAppService as ISwapAppService;
   }
 }
