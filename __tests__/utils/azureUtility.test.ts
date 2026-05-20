@@ -66,7 +66,7 @@ describe('azureUtility', () => {
   });
 
   describe('azureCommands.functionAppListConnectionStrings', () => {
-    it('should produce az webapp config connection-string list command for Function Apps', () => {
+    it('should produce az web_app config connection-string list command for Function Apps', () => {
       const cmd = azureCommands.functionAppListConnectionStrings('my-func', 'my-rg', {});
       expect(cmd).toContain('az webapp config connection-string list');
       expect(cmd).toContain('--name my-func');
@@ -82,7 +82,7 @@ describe('azureUtility', () => {
   describe('azureCommands.functionAppSetConnectionString', () => {
     const appSetting = { name: 'MY_CONN', value: 'Server=tcp:...', type: 'SQLServer' as const, slotSetting: false };
 
-    it('should produce az webapp config connection-string set command for Function Apps', () => {
+    it('should produce az web_app config connection-string set command for Function Apps', () => {
       const cmd = azureCommands.functionAppSetConnectionString('my-func', 'my-rg', appSetting, {});
       expect(cmd).toContain('az webapp config connection-string set');
       expect(cmd).toContain('--name my-func');

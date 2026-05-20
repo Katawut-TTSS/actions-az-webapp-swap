@@ -78,7 +78,7 @@ test('InputValidation.validate resourceType is function_app should pass validati
   expect(InputValidation.validate(input).resourceType).toBe('function_app');
 });
 
-test('InputValidation.validate legacy webapp alias should throw', () => {
+test('InputValidation.validate legacy web_app alias should throw', () => {
   const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'webapp' as never };
   expect(() => InputValidation.validate(input)).toThrow();
 });
