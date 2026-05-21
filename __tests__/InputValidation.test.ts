@@ -83,7 +83,7 @@ test('InputValidation.validate legacy web_app alias should throw', () => {
   expect(() => InputValidation.validate(input)).toThrow();
 });
 
-test('InputValidation.validate legacy functionapp alias should throw', () => {
+test('InputValidation.validate legacy function_app alias should throw', () => {
   const input: Partial<ISwapAppService> = { ...swapAppService, resourceType: 'functionapp' as never };
   expect(() => InputValidation.validate(input)).toThrow();
 });
