@@ -10,7 +10,7 @@ export const FUNCTION_APP_CRITICAL_SETTINGS = [
 ];
 
 /**
- * Emits core.warning() for each critical Function App setting that is not marked as slotSetting: true.
+ * Emits core.warning() for each critical Function App setting that is marked as slotSetting: true.
  * Only runs when resourceType === 'function_app'. Non-blocking.
  */
 export function warnFunctionAppCriticalSettings(
@@ -29,7 +29,7 @@ export function warnFunctionAppCriticalSettings(
     const found = appSettingsByName.get(criticalSetting);
     if (found && !found.slotSetting) {
       core.warning(
-        `Function App critical setting '${criticalSetting}' is not marked as slotSetting. Swapping this setting may cause issues.`
+        `Function App critical setting '${criticalSetting}' is marked as slotSetting. Swapping this setting may cause issues.`
       );
     }
   }

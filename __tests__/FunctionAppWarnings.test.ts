@@ -38,7 +38,7 @@ describe('warnFunctionAppCriticalSettings', () => {
       expect(mockWarning.mock.calls).toHaveLength(FUNCTION_APP_CRITICAL_SETTINGS.length);
       for (const name of FUNCTION_APP_CRITICAL_SETTINGS) {
         expect(mockWarning.mock.calls).toContainEqual([
-          `Function App critical setting '${name}' is not marked as slotSetting. Swapping this setting may cause issues.`,
+          `Function App critical setting '${name}' is marked as slotSetting. Swapping this setting may cause issues.`,
         ]);
       }
     });
@@ -76,10 +76,10 @@ describe('warnFunctionAppCriticalSettings', () => {
 
       expect(mockWarning.mock.calls).toHaveLength(2);
       expect(mockWarning.mock.calls).toContainEqual([
-        `Function App critical setting 'FUNCTIONS_WORKER_RUNTIME' is not marked as slotSetting. Swapping this setting may cause issues.`,
+        `Function App critical setting 'FUNCTIONS_WORKER_RUNTIME' is marked as slotSetting. Swapping this setting may cause issues.`,
       ]);
       expect(mockWarning.mock.calls).toContainEqual([
-        `Function App critical setting 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING' is not marked as slotSetting. Swapping this setting may cause issues.`,
+        `Function App critical setting 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING' is marked as slotSetting. Swapping this setting may cause issues.`,
       ]);
     });
 

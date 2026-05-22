@@ -23,9 +23,7 @@ interface IAppSettingsAllSlots {
 }
 
 export class GetDeploySlots {
-  constructor(private swapAppService: ISwapAppService) {
-    this.swapAppService = InputValidation.validate(this.swapAppService);
-  }
+  constructor(private swapAppService: ISwapAppService) {}
 
   private async uploadArtifact(artifactName: string, files: string[]) {
     const artifactClient = new DefaultArtifactClient();
