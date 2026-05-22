@@ -7,9 +7,6 @@ import { isEmptyString } from './utils/commonUtility';
 import { Clean } from './commands/Clean';
 import { CreateSwapPlan } from './commands/CreateSwapPlan';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 export type Mode = 'get-deploy-slots' | 'create-swap-plan' | 'set-deploy-slots' | 'swap-slots' | 'clean';
 
 function safeParseJson(json: string) {

@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import { IAppSetting, ISwapAppService, SlotType } from '../interfaces';
-import InputValidation from '../validation/InputValidation';
 import SwapAppSettings from './SwapAppSettings';
 import fs from 'fs';
 import SwapAppSettingsValidation from '../validation/SwapAppSettings';
@@ -35,7 +34,6 @@ export default class AppSettingsBase {
     if (options.defaultEncoding) this.options.defaultEncoding = options.defaultEncoding;
     if (options.workingDirectory) this.options.workingDirectory = options.workingDirectory;
     core.info('Validating Action Input...');
-    this.swapAppService = InputValidation.validate(this.swapAppService);
   }
 
   /**

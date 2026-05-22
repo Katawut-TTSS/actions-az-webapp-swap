@@ -3,9 +3,12 @@ import { ISwapAppService } from '../interfaces';
 import AppSettings from '../core/AppSettings';
 import { AppSettingsType } from '../core/AppSettingsBase';
 import { AppSettingsProviderFactory } from '../core/AppSettingsProviderFactory';
+import InputValidation from '../validation/InputValidation';
 
 export class SetDeploySlots {
-  constructor(private swapAppService: ISwapAppService) {}
+  constructor(private swapAppService: ISwapAppService) {
+    this.swapAppService = InputValidation.validate(this.swapAppService);
+  }
 
   public async execute() {
     core.debug(`Using set-deploy-slots mode`);
