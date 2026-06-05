@@ -13,11 +13,13 @@ const AppSettingSchema = z.object({
 const SwapAppServiceSchema = z.object({
   name: z.string(),
   resourceGroup: z.string(),
+  subscriptionId: z.string().optional(),
   slot: z.string(),
   targetSlot: z.string(),
   defaultSlotSetting: z.nativeEnum(DefaultSlotSettingEnum),
   defaultSensitive: z.nativeEnum(DefaultSensitiveEnum),
   defaultHideValue: z.boolean().optional(),
+  resourceType: z.enum(['web_app', 'function_app']).optional(),
   appSettings: z.array(AppSettingSchema).optional(),
   connectionStrings: z.array(AppSettingSchema).optional(),
 });
